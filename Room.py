@@ -27,8 +27,4 @@ class Room:
         pass
  
 
-#a = Room(5,15,35,12,9)
-#print(a.get())
-#a.update(x = 33, capacity = 11, permissions = 55, y = 1, randomThing = 88)
-#print(a.get())
-#print(a.get())
+ 
