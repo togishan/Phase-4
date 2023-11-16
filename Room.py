@@ -1,13 +1,14 @@
 import json
 
 class Room:
-    def __init__(self, x, y, capacity, workingHours, permissions):
+    def __init__(self, name, x, y, capacity, workingHours, permissions):
+        self.name = name
         self.x = x
         self.y = y
         self.capacity = capacity
         self.workingHours = workingHours
         self.permissions = permissions
-    
+
     def get(self):
         val = {
             "x": self.x,
@@ -22,9 +23,6 @@ class Room:
         for key, value in kw.items(): 
             setattr(self, key, value)
 
-
-    def delete(self):
-        pass
- 
-
- 
+    def attach(self, id):
+        self.id = id
+        

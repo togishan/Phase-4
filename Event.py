@@ -26,8 +26,6 @@ class Event:
         for key, value in kw.items(): 
             setattr(self, key, value)
 
-
     def delete(self):
         pass
  
-
