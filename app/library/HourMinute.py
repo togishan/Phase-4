@@ -3,9 +3,8 @@ class HourMinute:
         self.hour = hour
         self.minute = minute
 
-    def get(self):
-        val = {
+    def to_dict(self) -> dict:
+        return {
             "hour": self.hour,
             "minute": self.minute,
         }
-        return val
