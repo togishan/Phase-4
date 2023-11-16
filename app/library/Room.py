@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from .Permission import Permission
+from .HourMinute import HourMinute
 
 
 class Room:
@@ -10,14 +11,16 @@ class Room:
         x: float,
         y: float,
         capacity: int,
-        working_hours: tuple[datetime],
+        open_time: HourMinute,
+        close_time: HourMinute,
         permissions: list[Permission],
     ):
         self.name = name
         self.x = x
         self.y = y
         self.capacity = capacity
-        self.working_hours = working_hours
+        self.open_time = open_time
+        self.close_time = close_time
         self.permissions = permissions
 
     def get(self):
@@ -25,10 +28,11 @@ class Room:
             "x": self.x,
             "y": self.y,
             "capacity": self.capacity,
-            "workingHours": self.working_hours,
+            "open_time": self.open_time.get(),
+            "close_time": self.close_time.get(),
             "permissions": self.permissions,
         }
-        return json.dumps(val, indent=3)
+        return json.dumps(val, indent=4)
 
     def update(self, **kw):
         for key, value in kw.items():
