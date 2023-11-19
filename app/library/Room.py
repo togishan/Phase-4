@@ -1,9 +1,7 @@
-from datetime import datetime, timedelta
 import json
 from uuid import uuid4
-from .Permission import Permission
 from .HourMinute import HourMinute
-from .Event import Event
+from ..auth.UserGroup import UserGroup
 
 
 class Room:
@@ -15,7 +13,7 @@ class Room:
         capacity: int,
         open_time: HourMinute,
         close_time: HourMinute,
-        permissions: list[Permission],
+        user_groups: list[UserGroup] = None,
     ):
         self.id = uuid4()
         self.name = name
@@ -24,7 +22,10 @@ class Room:
         self.capacity = capacity
         self.open_time = open_time
         self.close_time = close_time
-        self.permissions = permissions
+        self.user_groups = user_groups if user_groups else []
+
+    def get_id(self) -> str:
+        return str(self.id)
 
     def get(self) -> str:
         val = self.to_dict()
@@ -36,28 +37,11 @@ class Room:
 
     def to_dict(self) -> dict:
         return {
+            "id": self.get_id(),
             "x": self.x,
             "y": self.y,
             "capacity": self.capacity,
             "open_time": self.open_time.to_dict(),
             "close_time": self.close_time.to_dict(),
-            "permissions": self.permissions,
+            "user_groups": [UserGroup(i).name for i in self.user_groups],
         }
-
-    def is_available(self, start_time: datetime, end_time: datetime) -> bool:
-        # TODO
-        return True
-
-    def reserve(self, event: Event):
-        # Check if room is available
-        if not self.is_available(
-            event.start_time, event.start_time + timedelta(minutes=event.duration)
-        ):
-            return False
-
-        # Check if room has enough capacity
-        if self.capacity < event.capacity:
-            return False
-
-        # TODO: Reserve room
-        return True
