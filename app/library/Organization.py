@@ -106,7 +106,7 @@ class Organization:
         for each in events_in_room:
             if each.weekly:
                 current_time = each.start_time
-                while current_time < end_time:              # INFINTITE LOOP ???
+                while current_time <= each.weekly or (current_time.year == each.weekly.year and current_time.month == each.weekly.month and current_time.day == each.weekly.day):          
                     if self.are_two_times_conflicting(
                         start_time,
                         end_time,
@@ -114,6 +114,7 @@ class Organization:
                         current_time + timedelta(minutes=each.duration),
                     ):
                         return False
+                    current_time += timedelta(days=7)
 
             else:
                 if self.are_two_times_conflicting(
@@ -145,16 +146,25 @@ class Organization:
             return False
 
         # Check if room is available
-        if not self.is_room_available(
-            room, start_time, start_time + timedelta(minutes=event.duration)
-        ):
-            return False
+        if event.weekly:
+            current_time = start_time           # NOT EFFICIENT 
+            while current_time < event.weekly or (current_time.year == event.weekly.year and current_time.month == event.weekly.month and current_time.day == event.weekly.day):         
+                if not self.is_room_available(
+                    room, current_time, current_time + timedelta(minutes=event.duration)
+                ):
+                    return False
+                current_time += timedelta(days=7)
+        else:
+            if not self.is_room_available(
+                room, start_time, start_time + timedelta(minutes=event.duration)
+            ):
+                return False
 
         # Reserve room
         event.start_time = start_time
         event.location = room
         self.reserved_events.append(event)
-
+        
         return True
 
     def reassign(self, event: Event, room_id: UUID):
@@ -199,10 +209,13 @@ class Organization:
     def is_inside_rectangle(rect: Rectangle, room: Room) -> bool:
         return room.x <= rect.top_right_x and room.y <= rect.top_right_y and room.x >= rect.bottom_left_x and room.y >= rect.bottom_left_y
         
-
     def find_room(
         self, event: Event, rect: Rectangle, start_time: datetime, end_time: datetime
     ):
+        # event exceeds the specified time interval
+        if start_time + timedelta(minutes=event.duration) > end_time:
+            return None
+        
         # find all the rooms within the specified rectangle area 
         # that are available in the specified time interval 
         # and have enough capacity for the event
@@ -212,6 +225,9 @@ class Organization:
             x.capacity >= event.capacity, self.rooms
         )
 
-        
+    def find_schedule(
+        self, eventList: list[Event], rect: Rectangle, start_time: datetime, end_time: datetime
+    ):
+        pass
 
 
