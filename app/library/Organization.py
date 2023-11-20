@@ -106,7 +106,7 @@ class Organization:
         for each in events_in_room:
             if each.weekly:
                 current_time = each.start_time
-                while current_time < end_time:
+                while current_time < end_time:              # INFINTITE LOOP ???
                     if self.are_two_times_conflicting(
                         start_time,
                         end_time,
@@ -194,8 +194,24 @@ class Organization:
         event.location = room
 
         return True
+    
+   
+    def is_inside_rectangle(rect: Rectangle, room: Room) -> bool:
+        return room.x <= rect.top_right_x and room.y <= rect.top_right_y and room.x >= rect.bottom_left_x and room.y >= rect.bottom_left_y
+        
 
     def find_room(
         self, event: Event, rect: Rectangle, start_time: datetime, end_time: datetime
     ):
-        pass
+        # find all the rooms within the specified rectangle area 
+        # that are available in the specified time interval 
+        # and have enough capacity for the event
+        return filter(
+            lambda x: self.is_inside_rectangle(rect, x) and 
+            self.is_room_available(x, start_time, end_time) and
+            x.capacity >= event.capacity, self.rooms
+        )
+
+        
+
+
