@@ -50,7 +50,7 @@ class Event:
             if self.start_time
             else None,
             "location": self.location.to_dict() if self.location else None,
-            "weekly": self.weekly,
+            "weekly": self.weekly.strftime("%Y-%m-%d") if self.weekly else None,
         }
 
     def get(self):
