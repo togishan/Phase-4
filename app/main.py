@@ -6,6 +6,7 @@ from .library.Room import Room
 from .library.HourMinute import HourMinute
 from .dependency_manager import DependencyManager
 from datetime import datetime
+from .library.Rectangle import Rectangle
 
 
 def main():
@@ -25,6 +26,12 @@ def main():
     google_organization = Organization(
         name="Google Developers Club",
         owner=organizer,
+        map=Rectangle(
+            top_left_x=0,
+            top_right_y=0,
+            bottom_right_x=100,
+            bottom_left_y=100,
+        ),
         rooms={main_room},
     )
     DependencyManager.register(Organization, google_organization)

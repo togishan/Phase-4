@@ -4,13 +4,17 @@ from .Room import Room
 from .Event import Event
 from ..auth.User import User
 from datetime import datetime, timedelta
+from .Rectangle import Rectangle
 
 
 class Organization:
-    def __init__(self, owner: User, name: str, rooms: list[Room] | None = None) -> None:
+    def __init__(
+        self, owner: User, name: str, map: Rectangle, rooms: list[Room] | None = None
+    ) -> None:
         self.id = uuid4()
         self.owner = owner
         self.name = name
+        self.map = map
 
         self.rooms = rooms if rooms else []
         self.reserved_events: list[Event] = []
@@ -25,6 +29,7 @@ class Organization:
             "name": self.name,
             "rooms": [i.to_dict() for i in self.rooms],
             "reserved_events": [i.to_dict() for i in self.reserved_events],
+            "map": self.map.to_dict(),
         }
 
     def get(self) -> str:
@@ -189,3 +194,8 @@ class Organization:
         event.location = room
 
         return True
+
+    def find_room(
+        self, event: Event, rect: Rectangle, start_time: datetime, end_time: datetime
+    ):
+        pass
