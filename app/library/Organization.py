@@ -151,3 +151,41 @@ class Organization:
         self.reserved_events.append(event)
 
         return True
+
+    def reassign(self, event: Event, room_id: UUID):
+        # Check if event is already assigned
+        if (
+            not event.location
+            or not event.start_time
+            or event not in self.reserved_events
+        ):
+            return False
+
+        # Check if room exists
+        room = self.get_room(room_id)
+        if not room:
+            return False
+
+        # Check if user is in a group that can reserve this room
+        can_reserve = False
+        for each_user_group in room.user_groups:
+            if each_user_group in room.user_groups:
+                can_reserve = True
+                break
+        if not can_reserve:
+            return False
+
+        # Check if room has enough capacity
+        if room.capacity < event.capacity:
+            return False
+
+        # Check if room is available
+        if not self.is_room_available(
+            room, event.start_time, event.start_time + timedelta(minutes=event.duration)
+        ):
+            return False
+
+        # Reserve room
+        event.location = room
+
+        return True
