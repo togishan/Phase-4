@@ -65,7 +65,13 @@ def test0():
         duration=60,
         weekly=datetime(2023,1,15),
     )
-
+    keynote_event5 = Event(
+        title="Keynote3",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=800,
+    )
     print(google_organization.reserve(
         event=keynote_event1,
         room_id=main_room.id,
@@ -112,6 +118,12 @@ def test0():
         room_id=main_room.id,
         start_time=datetime(2022, 12, 25, 8, 30),
     ))
+    # try to add an event which exceeds the closing time
+    print(google_organization.reserve(
+        event=keynote_event5,
+        room_id=main_room.id,
+        start_time=datetime(2024, 1, 1, 9, 00),
+    ))
     print(google_organization.get())
 
 # test find_room function
@@ -150,8 +162,15 @@ def test1():
         description="Keynote by Google Developers Club",
         category=EventCategory.CONCERT,
         capacity=100,
-        duration=120,
+        duration=180,
         weekly=datetime(2023,2,25)
+    )
+    keynote_event3 = Event(
+        title="Keynote3",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=800,
     )
     # reserve the dates
     # 2023-01-22 10:00  
@@ -178,14 +197,55 @@ def test1():
     # 2023-02-05 09:00 
     # 2023-02-05 10:00
     # 2023-02-05 11:00
-    # will also conflict with keynote_event1
+    # will also conflict with keynote_event1 so they will be discarded too
     lst = google_organization.find_room(keynote_event2, Rectangle(0,0,5,5), datetime(2023,1,29),datetime(2023,2,7), 60)
     for i in lst:
         print(i[2])
-def main():
-    organizer = User(name="John Doe", user_groups=[])
-    DependencyManager.register(User, organizer)
+    print("###")
+    # try to find a reservation for an event which exceeds room's working hours
+    lst = google_organization.find_room(keynote_event3, Rectangle(0,0,5,5), datetime(2023,1,29),datetime(2023,2,7), 60)
+    for i in lst:
+        print(i[2])
+# test for checking operator overloading for Event class and observe 
+# Python list.sort() function works as desired 
+def test2():
+    ev1 = Event(
+        title="Keynote",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=60,
+    )
+    ev2 = Event(
+        title="Keynote2",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=80,
+    )
+    ev3 =  Event(
+        title="Keynote3",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=70,
+    )
+    ev4 =  Event(
+        title="Keynote4",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=70,
+    )
+    lst = [ev1,ev2,ev3,ev4]
+    lst.sort(reverse=True)
+    for i in lst:
+        print(i.get())
 
+
+# test whether find_schedule works as intended
+def test3():
+    organizer = User(name="John Doe", user_groups=[])
     main_room = Room(
         name="Main Room",
         x=1,
@@ -195,43 +255,74 @@ def main():
         close_time=HourMinute(17, 0),
         user_groups=[UserGroup.ADMIN],
     )
-
     google_organization = Organization(
         name="Google Developers Club",
         owner=organizer,
         map=Rectangle(
-            top_left_x=0,
-            top_right_y=0,
-            bottom_right_x=100,
-            bottom_left_y=100,
+            bottom_left_x=0,
+            bottom_left_y=0,
+            top_right_x=100,
+            top_right_y=100,
         ),
         rooms={main_room},
     )
-    DependencyManager.register(Organization, google_organization)
-
-    keynote_event = Event(
+    ev1 = Event(
         title="Keynote",
         description="Keynote by Google Developers Club",
         category=EventCategory.CONCERT,
         capacity=100,
         duration=60,
+        weekly=datetime(2023,3,8),
     )
-
-    print(organizer.get())
-    print(google_organization.get())
-    print(keynote_event.get())
-
+    ev2 = Event(
+        title="Keynote2",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=80,
+    )
+    ev3 =  Event(
+        title="Keynote3",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=70,
+    )
+    ev4 =  Event(
+        title="Keynote4",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=70,
+    )
+    ev5 =  Event(
+        title="Keynote5",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=800,
+    )
     google_organization.reserve(
-        event=keynote_event,
+        event = ev1,
         room_id=main_room.id,
-        start_time=datetime(2023, 1, 1, 8, 0),
+        start_time=datetime(2023, 1, 22, 10, 0),
     )
+    lst = [ev2,ev3,ev4]
+    lst2 = google_organization.find_schedule(lst, Rectangle(0,0,5,5), datetime(2023,1,29),datetime(2023,1,31), 60)
+    for i in lst2:
+        print(i[0].get(), i[2])
+    print("###")
 
-    print(google_organization.get())
-
+    # try to find schedule with an event which exceeds working hours
+    lst = [ev2,ev3,ev4,ev5]
+    lst2 = google_organization.find_schedule(lst, Rectangle(0,0,5,5), datetime(2023,1,29),datetime(2023,1,31), 60)
+    for i in lst2:
+        print(i[0].get(), i[2])
+def main():
+    test0()
+    test1()
+    test2()
+    test3()
 
 if __name__ == "__main__":
-    #main()
-    #test0()
-    test0()
-    pass
+    main()
