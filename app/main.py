@@ -8,7 +8,10 @@ from .dependency_manager import DependencyManager
 from datetime import datetime
 from .library.Rectangle import Rectangle
 
-def test():
+
+# test reserve method to check it reserves event properly and 
+# on encountering with conflict discarding and returning False
+def test0():
     organizer = User(name="John Doe", user_groups=[])
     main_room = Room(
         name="Main Room",
@@ -62,45 +65,123 @@ def test():
         duration=60,
         weekly=datetime(2023,1,15),
     )
-    google_organization.reserve(
+
+    print(google_organization.reserve(
         event=keynote_event1,
         room_id=main_room.id,
         start_time=datetime(2023, 1, 8, 8, 0),
-    )
+    ))
     # try to add event which occupies main room in dates:
     #   (y:2023, m:1, d:1, h:8)
     #   (y:2023, m:1, d:8, h:8)
     #   (y:2023, m:1, d:15, h:8)
     #   (y:2023, m:1, d:22, h:8)
     # WILL FAIL: clashes with keynote_event1
-    google_organization.reserve(
+    print(google_organization.reserve(
         event=keynote_event2,
         room_id=main_room.id,
         start_time=datetime(2023, 1, 1, 8, 0),
-    )
+    ))
     # try to add event which occupies main room in dates:
     #   (y:2023, m:1, d:15, h:9)
     #   (y:2023, m:1, d:22, h:9)
     #   (y:2023, m:1, d:29, h:9)
     # WILL SUCCESS
-    google_organization.reserve(
+    print(google_organization.reserve(
         event=keynote_event3,
         room_id=main_room.id,
         start_time=datetime(2023, 1, 15, 9, 0),
-    )
+    ))
     # try to add event which occupies main room in dates:
     #   (y:2022, m:12, d:25, h:9)
     #   (y:2023, m:1, d:1, h:9)
     #   (y:2023, m:1, d:8, h:9)
     #   (y:2023, m:1, d:15, h:9)
     # WILL FAIL: clashes with keynote_event3
-    google_organization.reserve(
+    print(google_organization.reserve(
         event=keynote_event4,
         room_id=main_room.id,
-        start_time=datetime(2022, 12, 25, 10, 0),
-    )
+        start_time=datetime(2022, 12, 25, 9, 0),
+    ))
+    # try to add same but shifting time by 30 mins before 9:00
+    # WILL FAIL: the event will take an hour. The event that starts
+    # at 8:30 will end in 9:30 and will clash with the event between 8:00 and 9:00
+
+    print(google_organization.reserve(
+        event=keynote_event4,
+        room_id=main_room.id,
+        start_time=datetime(2022, 12, 25, 8, 30),
+    ))
     print(google_organization.get())
 
+# test find_room function
+def test1():
+    organizer = User(name="John Doe", user_groups=[])
+    main_room = Room(
+        name="Main Room",
+        x=1,
+        y=1,
+        capacity=100,
+        open_time=HourMinute(8, 0),
+        close_time=HourMinute(17, 0),
+        user_groups=[UserGroup.ADMIN],
+    )
+    google_organization = Organization(
+        name="Google Developers Club",
+        owner=organizer,
+        map=Rectangle(
+            bottom_left_x=0,
+            bottom_left_y=0,
+            top_right_x=100,
+            top_right_y=100,
+        ),
+        rooms={main_room},
+    )
+    keynote_event1 = Event(
+        title="Keynote1",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=120,
+        weekly=datetime(2023,2,15)
+    )
+    keynote_event2 = Event(
+        title="Keynote2",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=120,
+        weekly=datetime(2023,2,25)
+    )
+    # reserve the dates
+    # 2023-01-22 10:00  
+    # 2023-01-29 10:00
+    # for keynote_event1
+    google_organization.reserve(
+        event=keynote_event1,
+        room_id=main_room.id,
+        start_time=datetime(2023, 1, 22, 10, 0),
+    )
+    # find available hours for rooms
+    # 2023-01-22 11:00 will be discarded since the event will 
+    # conflict with keynote_event1 which takes place hours between 10:00-12:00 
+    lst = google_organization.find_room(keynote_event2, Rectangle(0,0,5,5), datetime(2023,1,21),datetime(2023,1,23), 180)
+    for i in lst:
+        print(i[2])
+    print("###")
+    # 2023-01-29 09:00 
+    # 2023-01-29 10:00
+    # 2023-01-29 11:00
+    # will be discarded, since the event that starts these hours and takes 2 hours will conflict
+    # with weekly keynote_event1 which takes place between 2023-01-29 10:00 and 2023-01-29 12:00
+    # Also
+    # 2023-02-05 09:00 
+    # 2023-02-05 10:00
+    # 2023-02-05 11:00
+    # will also conflict with keynote_event1
+    lst = google_organization.find_room(keynote_event2, Rectangle(0,0,5,5), datetime(2023,1,29),datetime(2023,2,7), 60)
+    for i in lst:
+        print(i[2])
 def main():
     organizer = User(name="John Doe", user_groups=[])
     DependencyManager.register(User, organizer)
@@ -151,4 +232,6 @@ def main():
 
 if __name__ == "__main__":
     #main()
-    test()
+    #test0()
+    test0()
+    pass
