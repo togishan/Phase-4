@@ -148,7 +148,7 @@ class Organization:
         # Check if room is available
         if event.weekly:
             current_time = start_time           # NOT EFFICIENT 
-            while current_time < event.weekly or (current_time.year == event.weekly.year and current_time.month == event.weekly.month and current_time.day == event.weekly.day):         
+            while current_time <= event.weekly or (current_time.year == event.weekly.year and current_time.month == event.weekly.month and current_time.day == event.weekly.day):         
                 if not self.is_room_available(
                     room, current_time, current_time + timedelta(minutes=event.duration)
                 ):
@@ -209,21 +209,36 @@ class Organization:
     def is_inside_rectangle(rect: Rectangle, room: Room) -> bool:
         return room.x <= rect.top_right_x and room.y <= rect.top_right_y and room.x >= rect.bottom_left_x and room.y >= rect.bottom_left_y
         
+    # find all the rooms in the area with enough capacity to host an event, 
+    # then check for the available hours for the room  
+    #
+    # checking for available hour: begin iteration from start_date opening_time for the room and 
+    # iterate until end_date closing hour, iterator will be advanced by expected_duration on each iteration
+    #
+    # returns the list of tuples (event, Room, startTime) 
     def find_room(
-        self, event: Event, rect: Rectangle, start_time: datetime, end_time: datetime
+        self, event: Event, rect: Rectangle, start_date: datetime, end_date: datetime, expected_duration: datetime
     ):
-        # event exceeds the specified time interval
-        if start_time + timedelta(minutes=event.duration) > end_time:
-            return None
-        
-        # find all the rooms within the specified rectangle area 
-        # that are available in the specified time interval 
-        # and have enough capacity for the event
-        return filter(
-            lambda x: self.is_inside_rectangle(rect, x) and 
-            self.is_room_available(x, start_time, end_time) and
-            x.capacity >= event.capacity, self.rooms
+        available_reservations = []
+        # rooms in the rectangle with enough capacity to host the event
+        available_rooms = filter(
+            lambda x: self.is_inside_rectangle(rect, x) and x.capacity >= event.capacity, self.rooms
         )
+        # foreach room
+        for room in available_rooms:
+            date = datetime(start_date) 
+            # within specified date range
+            while date <= end_date:
+                closetime = date + timedelta(hours=room.close_time.hour, minutes=room.close_time.minute)
+                time = date + timedelta(hours=room.open_time.hour, minutes=room.open_time.minute)
+                # for each day between opening and closing hours
+                while time <= closetime:
+                    if self.is_room_available(room, time, time + timedelta(event.duration)):
+                        available_reservations += [(event, room, time)]
+                    time += timedelta(hours=expected_duration.hour, minutes=expected_duration.minute)
+                # next day
+                date += timedelta(days=1)
+        return available_reservations
 
     def find_schedule(
         self, eventList: list[Event], rect: Rectangle, start_time: datetime, end_time: datetime
