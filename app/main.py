@@ -318,11 +318,80 @@ def test3():
     lst2 = google_organization.find_schedule(lst, Rectangle(0,0,5,5), datetime(2023,1,29),datetime(2023,1,31), 60)
     for i in lst2:
         print(i[0].get(), i[2])
+
+def test4():
+    organizer = User(name="John Doe", user_groups=[])
+    main_room = Room(
+        name="Main Room",
+        x=1,
+        y=1,
+        capacity=100,
+        open_time=HourMinute(8, 0),
+        close_time=HourMinute(17, 0),
+        user_groups=[UserGroup.ADMIN],
+    )
+    google_organization = Organization(
+        name="Google Developers Club",
+        owner=organizer,
+        map=Rectangle(
+            bottom_left_x=0,
+            bottom_left_y=0,
+            top_right_x=100,
+            top_right_y=100,
+        ),
+        rooms={main_room},
+    )
+    ev1 = Event(
+        title="Keynote",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=60,
+        weekly=datetime(2023,3,8),
+    )
+    ev2 = Event(
+        title="Keynote2",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=80,
+    )
+    ev3 =  Event(
+        title="Keynote3",
+        description="Keynote by Google Developers Club",
+        category=EventCategory.CONCERT,
+        capacity=100,
+        duration=70,
+    )
+    google_organization.reserve(
+        event=ev1,
+        room_id=main_room.id,
+        start_time=datetime(2023, 1, 22, 10, 0),
+    )
+    google_organization.reserve(
+        event=ev2,
+        room_id=main_room.id,
+        start_time=datetime(2023, 1, 22, 11, 0),
+    )
+    google_organization.reserve(
+        event=ev3,
+        room_id=main_room.id,
+        start_time=datetime(2023, 1, 22, 13, 0),
+    )
+    q0 = google_organization.query(Rectangle(0,0,5,5), "Keynote", "CONCERT")
+    print(q0[0][0].get(), q0[0][1].get(), q0[0][2])
+    q1 = google_organization.query(None, "Keynote2", "CONCERT",main_room)
+    print(q1[0][0].get(), q1[0][1].get(), q1[0][2])
+    # empty list since the room is not inside the rectangle
+    q2 = google_organization.query(Rectangle(5,5,8,8), "Keynote3", "CONCERT")
+    print(q2)
 def main():
-    test0()
-    test1()
-    test2()
-    test3()
+    #test0()
+    #test1()
+    #test2()
+    #test3()
+    test4()
+
 
 if __name__ == "__main__":
     main()

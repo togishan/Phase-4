@@ -287,4 +287,17 @@ class Organization:
                 return []
         return result_list
 
+    def query(self, rect: Rectangle, title: str, category: str, room: Room = None):
+        return_list = []
+        # do everything with room
+        if rect == None:
+            for assignment in self.reserved_events:
+                if assignment.title == title and assignment.category.value == category and assignment.location == room:
+                    return_list += [(assignment, assignment.location, assignment.start_time)]
 
+        # do everything with rect
+        else:
+            for assignment in self.reserved_events:
+                if assignment.title == title and assignment.category.value == category and self.is_inside_rectangle(rect, assignment.location):
+                    return_list += [(assignment, assignment.location, assignment.start_time)]
+        return return_list
