@@ -82,7 +82,7 @@ class Organization:
         events_in_room = filter(
             lambda x: x.location.id == room.id, self.reserved_events
         )
-
+        
         # Is room open?
         if not (
             (
@@ -104,6 +104,7 @@ class Organization:
 
         # Is room available?
         for each in events_in_room:
+            
             if each.weekly:
                 current_time = each.start_time
                 while current_time <= each.weekly or (current_time.year == each.weekly.year and current_time.month == each.weekly.month and current_time.day == each.weekly.day):          
@@ -115,7 +116,7 @@ class Organization:
                     ):
                         return False
                     current_time += timedelta(days=7)
-
+                    
             else:
                 if self.are_two_times_conflicting(
                     start_time,
@@ -124,6 +125,7 @@ class Organization:
                     each.start_time + timedelta(minutes=each.duration),
                 ):
                     return False
+        
         return True
 
     def reserve(self, event: Event, room_id: UUID, start_time: datetime) -> bool:
@@ -202,22 +204,22 @@ class Organization:
 
         # Reserve room
         event.location = room
-
+        
         return True
     
    
-    def is_inside_rectangle(rect: Rectangle, room: Room) -> bool:
+    def is_inside_rectangle(self, rect: Rectangle, room: Room) -> bool:
         return room.x <= rect.top_right_x and room.y <= rect.top_right_y and room.x >= rect.bottom_left_x and room.y >= rect.bottom_left_y
         
     # find all the rooms in the area with enough capacity to host an event, 
     # then check for the available hours for the room  
     #
     # checking for available hour: begin iteration from start_date opening_time for the room and 
-    # iterate until end_date closing hour, iterator will be advanced by expected_duration on each iteration
+    # iterate until end_date closing hour, iterator will be advanced by expected_duration_minute on each iteration
     #
     # returns the list of tuples (event, Room, startTime) 
     def find_room(
-        self, event: Event, rect: Rectangle, start_date: datetime, end_date: datetime, expected_duration: datetime
+        self, event: Event, rect: Rectangle, start_date: datetime, end_date: datetime, expected_duration_minute: int
     ):
         available_reservations = []
         # rooms in the rectangle with enough capacity to host the event
@@ -226,16 +228,17 @@ class Organization:
         )
         # foreach room
         for room in available_rooms:
-            date = datetime(start_date) 
+            
+            date = start_date
             # within specified date range
             while date <= end_date:
                 closetime = date + timedelta(hours=room.close_time.hour, minutes=room.close_time.minute)
                 time = date + timedelta(hours=room.open_time.hour, minutes=room.open_time.minute)
                 # for each day between opening and closing hours
                 while time <= closetime:
-                    if self.is_room_available(room, time, time + timedelta(event.duration)):
+                    if self.is_room_available(room, time, time + timedelta(minutes=event.duration)):
                         available_reservations += [(event, room, time)]
-                    time += timedelta(hours=expected_duration.hour, minutes=expected_duration.minute)
+                    time += timedelta(minutes = expected_duration_minute)
                 # next day
                 date += timedelta(days=1)
         return available_reservations
