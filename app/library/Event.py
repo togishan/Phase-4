@@ -63,3 +63,12 @@ class Event:
 
     def delete(self):
         del self
+
+    def __gt__(self, other):
+        return self.duration > other.duration
+    def __ge__(self, other):
+        return self.duration >= other.duration
+    def __lt__(self, other):
+        return self.duration < other.duration
+    def __le__(self, other):
+        return self.duration <= other.duration
