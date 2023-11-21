@@ -236,16 +236,55 @@ class Organization:
                 time = date + timedelta(hours=room.open_time.hour, minutes=room.open_time.minute)
                 # for each day between opening and closing hours
                 while time <= closetime:
-                    if self.is_room_available(room, time, time + timedelta(minutes=event.duration)):
+                    if time + timedelta(minutes=event.duration) < closetime and self.is_room_available(room, time, time + timedelta(minutes=event.duration)):
                         available_reservations += [(event, room, time)]
                     time += timedelta(minutes = expected_duration_minute)
                 # next day
                 date += timedelta(days=1)
         return available_reservations
-
+    
+#  NOT HANDLING ALL CASES !!!
+#  sort events based on duration, an assignmsent for event with higher duration will be done priorly
+#  foreach event call find_room to find proper assignments for this event
+#  check whether proper assignment is conflicting with other event's assignment 
+#  if it conflicts check for other proper assignment for that event else add it to the result_list
+#  if no assignment could be done with that event return []
     def find_schedule(
-        self, eventList: list[Event], rect: Rectangle, start_time: datetime, end_time: datetime
+        self, eventList: list[Event], rect: Rectangle, start_date: datetime, end_date: datetime, expected_duration_minute: int
     ):
-        pass
+        # consists of tuples (event, room, start)
+        result_list = []
+        # consists of lists which consist of tuples (event, room, start)
+        available_assignments_for_events = []
+        # sort events descending by the duration
+        eventList.sort(reverse=True)
+        # foreach event find all assignable hour, room pairs
+        # if no assignable hour is found for the event then, the schedule can not be built so return []
+        # else add tuple list coming from the function find_room to the available_assignments_for_events list
+        for event in eventList:
+            temp = self.find_room(event, rect, start_date, end_date, expected_duration_minute)
+            if temp == []:
+                return []
+            available_assignments_for_events += [temp]
+
+        for assignments in available_assignments_for_events:
+            assignment_scheduled = False
+            for assignment in assignments:
+                # check if the assignment conflicts with previously added ones to the result_list
+                conflicts = False
+                for i in result_list:
+                    if i[1] == assignment[1] and self.are_two_times_conflicting(
+                        i[2], i[2] + timedelta(minutes=i[0].duration),
+                        assignment[2], assignment[2] + timedelta(minutes=assignment[0].duration)
+                    ):
+                        conflicts = True
+                        break
+                if not conflicts:
+                    result_list += [assignment]
+                    assignment_scheduled = True
+                    break
+            if not assignment_scheduled:
+                return []
+        return result_list
 
 
