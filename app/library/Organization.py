@@ -108,6 +108,10 @@ class Organization:
             self.rooms if self.has_permission(user, OrganizationPermission.LIST) else []
         )
 
+    def add_room(self, room: Room, user: User) -> None:
+        if self.has_permission(user, OrganizationPermission.ADD):
+            self.rooms.append(room)
+
     def are_two_times_conflicting(
         self,
         start_time1: datetime,
