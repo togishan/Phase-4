@@ -121,7 +121,7 @@ class Organization:
         events_in_room = filter(
             lambda x: x.location.id == room.id, self.reserved_events
         )
-        
+
         # Is room open?
         if not (
             (
@@ -143,10 +143,13 @@ class Organization:
 
         # Is room available?
         for each in events_in_room:
-            
             if each.weekly:
                 current_time = each.start_time
-                while current_time <= each.weekly or (current_time.year == each.weekly.year and current_time.month == each.weekly.month and current_time.day == each.weekly.day):          
+                while current_time <= each.weekly or (
+                    current_time.year == each.weekly.year
+                    and current_time.month == each.weekly.month
+                    and current_time.day == each.weekly.day
+                ):
                     if self.are_two_times_conflicting(
                         start_time,
                         end_time,
@@ -155,7 +158,7 @@ class Organization:
                     ):
                         return False
                     current_time += timedelta(days=7)
-                    
+
             else:
                 if self.are_two_times_conflicting(
                     start_time,
@@ -164,7 +167,7 @@ class Organization:
                     each.start_time + timedelta(minutes=each.duration),
                 ):
                     return False
-        
+
         return True
 
     def reserve(self, event: Event, room_id: UUID, start_time: datetime) -> bool:
@@ -188,8 +191,12 @@ class Organization:
 
         # Check if room is available
         if event.weekly:
-            current_time = start_time           # NOT EFFICIENT 
-            while current_time <= event.weekly or (current_time.year == event.weekly.year and current_time.month == event.weekly.month and current_time.day == event.weekly.day):         
+            current_time = start_time  # NOT EFFICIENT
+            while current_time <= event.weekly or (
+                current_time.year == event.weekly.year
+                and current_time.month == event.weekly.month
+                and current_time.day == event.weekly.day
+            ):
                 if not self.is_room_available(
                     room, current_time, current_time + timedelta(minutes=event.duration)
                 ):
@@ -205,7 +212,7 @@ class Organization:
         event.start_time = start_time
         event.location = room
         self.reserved_events.append(event)
-        
+
         return True
 
     def reassign(self, event: Event, room_id: UUID):
@@ -243,53 +250,76 @@ class Organization:
 
         # Reserve room
         event.location = room
-        
+
         return True
-    
-   
+
     def is_inside_rectangle(self, rect: Rectangle, room: Room) -> bool:
-        return room.x <= rect.top_right_x and room.y <= rect.top_right_y and room.x >= rect.bottom_left_x and room.y >= rect.bottom_left_y
-        
-    # find all the rooms in the area with enough capacity to host an event, 
-    # then check for the available hours for the room  
+        return (
+            room.x <= rect.top_right_x
+            and room.y <= rect.top_right_y
+            and room.x >= rect.bottom_left_x
+            and room.y >= rect.bottom_left_y
+        )
+
+    # find all the rooms in the area with enough capacity to host an event,
+    # then check for the available hours for the room
     #
-    # checking for available hour: begin iteration from start_date opening_time for the room and 
+    # checking for available hour: begin iteration from start_date opening_time for the room and
     # iterate until end_date closing hour, iterator will be advanced by expected_duration_minute on each iteration
     #
-    # returns the list of tuples (event, Room, startTime) 
+    # returns the list of tuples (event, Room, startTime)
     def find_room(
-        self, event: Event, rect: Rectangle, start_date: datetime, end_date: datetime, expected_duration_minute: int
+        self,
+        event: Event,
+        rect: Rectangle,
+        start_date: datetime,
+        end_date: datetime,
+        expected_duration_minute: int,
     ):
         available_reservations = []
         # rooms in the rectangle with enough capacity to host the event
         available_rooms = filter(
-            lambda x: self.is_inside_rectangle(rect, x) and x.capacity >= event.capacity, self.rooms
+            lambda x: self.is_inside_rectangle(rect, x)
+            and x.capacity >= event.capacity,
+            self.rooms,
         )
         # foreach room
         for room in available_rooms:
-            
             date = start_date
             # within specified date range
             while date <= end_date:
-                closetime = date + timedelta(hours=room.close_time.hour, minutes=room.close_time.minute)
-                time = date + timedelta(hours=room.open_time.hour, minutes=room.open_time.minute)
+                closetime = date + timedelta(
+                    hours=room.close_time.hour, minutes=room.close_time.minute
+                )
+                time = date + timedelta(
+                    hours=room.open_time.hour, minutes=room.open_time.minute
+                )
                 # for each day between opening and closing hours
                 while time <= closetime:
-                    if time + timedelta(minutes=event.duration) < closetime and self.is_room_available(room, time, time + timedelta(minutes=event.duration)):
+                    if time + timedelta(
+                        minutes=event.duration
+                    ) < closetime and self.is_room_available(
+                        room, time, time + timedelta(minutes=event.duration)
+                    ):
                         available_reservations += [(event, room, time)]
-                    time += timedelta(minutes = expected_duration_minute)
+                    time += timedelta(minutes=expected_duration_minute)
                 # next day
                 date += timedelta(days=1)
         return available_reservations
-    
-#  NOT HANDLING ALL CASES !!!
-#  sort events based on duration, an assignmsent for event with higher duration will be done priorly
-#  foreach event call find_room to find proper assignments for this event
-#  check whether proper assignment is conflicting with other event's assignment 
-#  if it conflicts check for other proper assignment for that event else add it to the result_list
-#  if no assignment could be done with that event return []
+
+    #  NOT HANDLING ALL CASES !!!
+    #  sort events based on duration, an assignmsent for event with higher duration will be done priorly
+    #  foreach event call find_room to find proper assignments for this event
+    #  check whether proper assignment is conflicting with other event's assignment
+    #  if it conflicts check for other proper assignment for that event else add it to the result_list
+    #  if no assignment could be done with that event return []
     def find_schedule(
-        self, eventList: list[Event], rect: Rectangle, start_date: datetime, end_date: datetime, expected_duration_minute: int
+        self,
+        eventList: list[Event],
+        rect: Rectangle,
+        start_date: datetime,
+        end_date: datetime,
+        expected_duration_minute: int,
     ):
         # consists of tuples (event, room, start)
         result_list = []
@@ -301,7 +331,9 @@ class Organization:
         # if no assignable hour is found for the event then, the schedule can not be built so return []
         # else add tuple list coming from the function find_room to the available_assignments_for_events list
         for event in eventList:
-            temp = self.find_room(event, rect, start_date, end_date, expected_duration_minute)
+            temp = self.find_room(
+                event, rect, start_date, end_date, expected_duration_minute
+            )
             if temp == []:
                 return []
             available_assignments_for_events += [temp]
@@ -313,8 +345,10 @@ class Organization:
                 conflicts = False
                 for i in result_list:
                     if i[1] == assignment[1] and self.are_two_times_conflicting(
-                        i[2], i[2] + timedelta(minutes=i[0].duration),
-                        assignment[2], assignment[2] + timedelta(minutes=assignment[0].duration)
+                        i[2],
+                        i[2] + timedelta(minutes=i[0].duration),
+                        assignment[2],
+                        assignment[2] + timedelta(minutes=assignment[0].duration),
                     ):
                         conflicts = True
                         break
@@ -331,12 +365,24 @@ class Organization:
         # do everything with room
         if rect == None:
             for assignment in self.reserved_events:
-                if assignment.title == title and assignment.category.value == category and assignment.location == room:
-                    return_list += [(assignment, assignment.location, assignment.start_time)]
+                if (
+                    assignment.title == title
+                    and assignment.category.value == category
+                    and assignment.location == room
+                ):
+                    return_list += [
+                        (assignment, assignment.location, assignment.start_time)
+                    ]
 
         # do everything with rect
         else:
             for assignment in self.reserved_events:
-                if assignment.title == title and assignment.category.value == category and self.is_inside_rectangle(rect, assignment.location):
-                    return_list += [(assignment, assignment.location, assignment.start_time)]
+                if (
+                    assignment.title == title
+                    and assignment.category.value == category
+                    and self.is_inside_rectangle(rect, assignment.location)
+                ):
+                    return_list += [
+                        (assignment, assignment.location, assignment.start_time)
+                    ]
         return return_list
