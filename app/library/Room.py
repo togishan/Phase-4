@@ -2,6 +2,12 @@ import json
 from uuid import uuid4
 from .HourMinute import HourMinute
 from ..auth.UserGroup import UserGroup
+from ..auth.User import User
+from enum import Enum
+
+
+class RoomPermission(Enum):
+    WRITE = "WRITE"
 
 
 class Room:
@@ -13,6 +19,7 @@ class Room:
         capacity: int,
         open_time: HourMinute,
         close_time: HourMinute,
+        permissions: dict[User, set[RoomPermission]] = None,
         user_groups: list[UserGroup] = None,
     ):
         self.id = uuid4()
@@ -22,6 +29,8 @@ class Room:
         self.capacity = capacity
         self.open_time = open_time
         self.close_time = close_time
+
+        self.permissions = permissions if permissions else {}
         self.user_groups = user_groups if user_groups else []
 
     def get_id(self) -> str:
@@ -45,3 +54,6 @@ class Room:
             "close_time": self.close_time.to_dict(),
             "user_groups": [UserGroup(i).name for i in self.user_groups],
         }
+
+    def has_permission(self, user: User, permission: RoomPermission) -> bool:
+        return permission in self.permissions.get(user, set())

@@ -1,20 +1,37 @@
 import json
+from enum import Enum
+
 from uuid import UUID, uuid4
 from .Room import Room
 from .Event import Event
 from ..auth.User import User
 from datetime import datetime, timedelta
 from .Rectangle import Rectangle
+from .Room import RoomPermission
+
+
+class OrganizationPermission(Enum):
+    LIST = "LIST"
+    ADD = "ADD"
+    ACCESS = "ACCESS"
+    DELETE = "DELETE"
 
 
 class Organization:
     def __init__(
-        self, owner: User, name: str, map: Rectangle, rooms: list[Room] | None = None
+        self,
+        owner: User,
+        name: str,
+        map: Rectangle,
+        permissions: dict[User, set[OrganizationPermission]] = None,
+        rooms: list[Room] | None = None,
     ) -> None:
         self.id = uuid4()
         self.owner = owner
         self.name = name
         self.map = map
+
+        self.permissions = permissions if permissions else {}
 
         self.rooms = rooms if rooms else []
         self.reserved_events: list[Event] = []
@@ -58,9 +75,31 @@ class Organization:
         if room:
             room.update(kw)
 
-    def delete_room(self, id: UUID) -> None:
+    def is_owner(self, user: User) -> bool:
+        return user.id == self.owner.id
+
+    def has_permission(self, user: User, permission: OrganizationPermission) -> bool:
+        return permission in self.permissions.get(user, set())
+
+    def delete_room(self, id: UUID, user: User) -> None:
         room = self.get_room(id)
-        if room:
+        if room and (
+            self.is_owner(user)
+            or (
+                self.has_permission(user, OrganizationPermission.DELETE)
+                and room.has_permission(user, RoomPermission.WRITE)
+            )
+        ):
+            # Delete events in that room
+            events_to_be_deleted = filter(
+                lambda e: e.location.id == room.id, self.reserved_events
+            )
+
+            for each in events_to_be_deleted:
+                self.reserved_events.remove(each)
+                each.delete()
+
+            # Delete room
             self.rooms.remove(room)
             del room
 

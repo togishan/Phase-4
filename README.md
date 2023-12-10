@@ -21,15 +21,17 @@
     - User will be notified for all events in the matching query definitions for the View. 
     - Note that permissions changes may also trigger notifications.
 ### 5. Organization Permissions
-    - Organization objects will have a dictionary of permissions. Permissions will be in the form of
+- Organization objects will have a dictionary of permissions. Permissions will be in the form of
     ```
     {
-        "LIST": ["user1", "user2"],
-        "ADD": ["user1"],
-        "ACCESS": ["user1"], // no need to have LIST permission to have ACCESS permission
-        "DELETE": ["user1"], // user1 also need to have WRITE permission for the room to delete the room from organization. However, owner of the organization can delete the room without WRITE permission. All events are deleted when the room is deleted regardless of the permissions of events
+    "user1": ["LIST", "ADD", "ACCESS", "DELETE"],
+    ...
     }
     ```
+- **LIST**: user can list the Room objects in the organization.
+- **ADD**: user can add new rooms to the organization.
+- **ACCESS**: user can access the rooms and events in the organization. Note that this can be done without LIST permission.
+- **DELETE**: user can delete a Room in the organization if s/he also has WRITE permission on it. Owner of the Organization can delete the Room without WRITE permission. All Events in the Room are automatically deleted regardless of Event permissions.
 ### 6. Room have their own permissions
     ```
     {
