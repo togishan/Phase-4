@@ -103,6 +103,11 @@ class Organization:
             self.rooms.remove(room)
             del room
 
+    def list_rooms(self, user: User) -> list[Room]:
+        return (
+            self.rooms if self.has_permission(user, OrganizationPermission.LIST) else []
+        )
+
     def are_two_times_conflicting(
         self,
         start_time1: datetime,
