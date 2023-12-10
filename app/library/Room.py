@@ -3,7 +3,10 @@ from uuid import uuid4
 from .HourMinute import HourMinute
 from ..auth.UserGroup import UserGroup
 from ..auth.User import User
+from .Event import Event
+from .Organization import Organization
 from enum import Enum
+from ..dependency_manager import DependencyManager
 
 
 class RoomPermission(Enum):
@@ -13,6 +16,7 @@ class RoomPermission(Enum):
 class Room:
     def __init__(
         self,
+        owner: User,
         name: str,
         x: float,
         y: float,
@@ -23,6 +27,7 @@ class Room:
         user_groups: list[UserGroup] = None,
     ):
         self.id = uuid4()
+        self.owner = owner
         self.name = name
         self.x = x
         self.y = y
@@ -57,3 +62,15 @@ class Room:
 
     def has_permission(self, user: User, permission: RoomPermission) -> bool:
         return permission in self.permissions.get(user, set())
+
+    def list_events(self, user: User) -> list[Event]:
+        if self.has_permission(user, RoomPermission.WRITE) or user == self.owner:
+            organization: Organization = DependencyManager.get(Organization)
+
+            events_of_this_room = list(
+                filter(lambda e: e.location.id == self.id, organization.reserved_events)
+            )
+
+            return events_of_this_room
+
+        return []
