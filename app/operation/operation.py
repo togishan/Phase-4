@@ -7,6 +7,11 @@ class OperationType(str, Enum):
     LOGOUT = "logout"
     REGISTER = "register"
 
+    CREATE_ORGANIZATION = "create_organization"
+
+    CREATE_ROOM = "create_room"
+    ADD_ROOM_TO_ORGANIZATION = "add_room_to_organization"
+
 
 class InvalidOperationFormatError(Exception):
     pass

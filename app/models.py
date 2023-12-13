@@ -14,10 +14,24 @@ class User(BaseModel):
     username = CharField(max_length=256, unique=True)
     password = CharField(max_length=256)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "username": self.username,
+        }
+
 
 class Organization(BaseModel):
     name = CharField(max_length=256)
     owner = ForeignKeyField(User, backref="organizations")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "owner": self.owner.to_dict(),
+        }
 
 
 class UserPermissionForOrganization(BaseModel):
@@ -45,6 +59,18 @@ class Room(BaseModel):
     open_time = CharField(max_length=256)
     close_time = CharField(max_length=256)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "owner": self.owner.to_dict(),
+            "x": self.x,
+            "y": self.y,
+            "capacity": self.capacity,
+            "open_time": self.open_time,
+            "close_time": self.close_time,
+        }
+
 
 class UserPermissionForRoom(BaseModel):
     user = ForeignKeyField(User, backref="permissions")
@@ -58,6 +84,12 @@ class UserPermissionForRoom(BaseModel):
 class RoomInOrganization(BaseModel):
     room = ForeignKeyField(Room, backref="organizations")
     organization = ForeignKeyField(Organization, backref="rooms")
+
+    def to_dict(self):
+        return {
+            "room": self.room.to_dict(),
+            "organization": self.organization.to_dict(),
+        }
 
 
 class Event(BaseModel):

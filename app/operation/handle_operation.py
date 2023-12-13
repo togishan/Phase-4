@@ -12,6 +12,12 @@ def handle_operation(
         return handle_login_operation(operation)
     elif operation.type == OperationType.LOGOUT:
         return handle_logout_operation(operation)
+    elif operation.type == OperationType.CREATE_ORGANIZATION:
+        return handle_create_organization_operation(operation)
+    elif operation.type == OperationType.CREATE_ROOM:
+        return handle_create_room_operation(operation)
+    elif operation.type == OperationType.ADD_ROOM_TO_ORGANIZATION:
+        return handle_add_room_to_organization_operation(operation)
 
 
 def handle_register_operation(operation: Operation) -> OperationResponse:
@@ -31,7 +37,7 @@ def handle_register_operation(operation: Operation) -> OperationResponse:
         return OperationResponse(
             status=True,
             result={
-                "user": {"id": user.id, "username": user.username, "name": user.name}
+                "user": user.to_dict(),
             },
         )
     except Exception as e:
@@ -57,7 +63,7 @@ def handle_login_operation(operation: Operation) -> OperationResponse:
         return OperationResponse(
             status=True,
             result={
-                "user": {"id": user.id, "username": user.username, "name": user.name}
+                "user": user.to_dict(),
             },
         )
     except Exception as e:
@@ -80,6 +86,99 @@ def handle_logout_operation(operation: Operation) -> OperationResponse:
         return OperationResponse(
             status=True,
             result={},
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_create_organization_operation(operation: Operation) -> OperationResponse:
+    from ..models import Organization, User
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        if user is None:
+            return OperationResponse(
+                status=False, result={"message": "User not logged in"}
+            )
+
+        organization: Organization = Organization.create(
+            name=operation.args["name"], owner=user
+        )
+
+        return OperationResponse(
+            status=True,
+            result={
+                "organization": organization.to_dict(),
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_create_room_operation(operation: Operation) -> OperationResponse:
+    from ..models import Room, User
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        if user is None:
+            return OperationResponse(
+                status=False, result={"message": "User not logged in"}
+            )
+
+        room: Room = Room.create(
+            name=operation.args["name"],
+            owner=user,
+            x=operation.args["x"],
+            y=operation.args["y"],
+            capacity=operation.args["capacity"],
+            # TODO : Validate time format
+            open_time=operation.args["open_time"],
+            close_time=operation.args["close_time"],
+        )
+
+        return OperationResponse(
+            status=True,
+            result={
+                "room": room.to_dict(),
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_add_room_to_organization_operation(
+    operation: Operation,
+) -> OperationResponse:
+    from ..models import Organization, Room, User, RoomInOrganization
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        if user is None:
+            return OperationResponse(
+                status=False, result={"message": "User not logged in"}
+            )
+
+        organization: Organization = Organization.get(
+            Organization.id == operation.args["organization_id"]
+        )
+        room: Room = Room.get(Room.id == operation.args["room_id"])
+
+        room_in_organization = RoomInOrganization.create(
+            room=room,
+            organization=organization,
+        )
+
+        return OperationResponse(
+            status=True,
+            result={
+                "room_in_organization": room_in_organization.to_dict(),
+            },
         )
     except Exception as e:
         return OperationResponse(status=False, result={"message": str(e)})

@@ -79,13 +79,52 @@ if __name__ == "__main__":
             send_data(login_operation)
             login_operation_response = get_data()
 
-            # Logout
-            logout_operation = Operation(
-                type=OperationType.LOGOUT,
-                args={},
+            # # Logout
+            # logout_operation = Operation(
+            #     type=OperationType.LOGOUT,
+            #     args={},
+            # )
+            # send_data(logout_operation)
+            # logout_operation_response = get_data()
+
+            # Create organization
+            create_organization_operation = Operation(
+                type=OperationType.CREATE_ORGANIZATION,
+                args={"name": "test_organization"},
             )
-            send_data(logout_operation)
-            logout_operation_response = get_data()
+            send_data(create_organization_operation)
+            create_organization_operation_response = get_data()
+
+            # Create room
+            create_room_operation = Operation(
+                type=OperationType.CREATE_ROOM,
+                args={
+                    "name": "test_room",
+                    "x": 0,
+                    "y": 0,
+                    "capacity": 10,
+                    "open_time": "10:00",
+                    "close_time": "20:00",
+                },
+            )
+            send_data(create_room_operation)
+            create_room_operation_response = get_data()
+
+            # Add room to organization
+            organization_id = create_organization_operation_response.result[
+                "organization"
+            ]["id"]
+            room_id = create_room_operation_response.result["room"]["id"]
+
+            add_room_to_organization_operation = Operation(
+                type=OperationType.ADD_ROOM_TO_ORGANIZATION,
+                args={
+                    "organization_id": organization_id,
+                    "room_id": room_id,
+                },
+            )
+            send_data(add_room_to_organization_operation)
+            add_room_to_organization_operation_response = get_data()
 
     except ServerDisconnectedError:
         print("Server disconnected")
