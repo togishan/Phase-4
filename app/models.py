@@ -132,7 +132,10 @@ class UserPermissionForEvent(BaseModel):
     event = ForeignKeyField(Event, backref="permissions")
     permission = CharField(
         max_length=256,
-        choices=(("WRITE", "WRITE")),
+        choices=(
+            ("WRITE", "WRITE"),
+            ("READ", "READ"),
+        ),
     )
 
 
