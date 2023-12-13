@@ -58,12 +58,12 @@ room.
 
 
 #### 7. Event have their own permissions
-    ```
-    {
-        "READ": ["user1", "user2"], // user can see the title and details of the events. If
+```
+{
+    "READ": ["user1", "user2"], // user can see the title and details of the events. If
 not granted room will be displayed as BUSY without any other detail.
-        "WRITE": ["user1"], // User can update and delete (if Room has DELETE too) the Event
-    }
-    ```
+    "WRITE": ["user1"], // User can update and delete (if Room has DELETE too) the Event
+}
+```
 #### 8. View
 - **x** roomView and dayView commands result on a list of tables, a table per matching Room and a table per matching Day respectively.
