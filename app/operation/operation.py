@@ -11,6 +11,7 @@ class OperationType(str, Enum):
     CHANGE_USER_PERMISSON_FOR_ORGANIZATION = "change_user_permission_for_organization"
 
     CREATE_ROOM = "create_room"
+    CHANGE_USER_PERMISSON_FOR_ROOM = "change_user_permission_for_room"
     ADD_ROOM_TO_ORGANIZATION = "add_room_to_organization"
 
 

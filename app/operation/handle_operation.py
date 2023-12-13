@@ -15,9 +15,11 @@ def handle_operation(
     elif operation.type == OperationType.CREATE_ORGANIZATION:
         return handle_create_organization_operation(operation)
     elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_ORGANIZATION:
-        return handle_change_permission_for_organization_operation(operation)
+        return handle_change_user_permission_for_organization_operation(operation)
     elif operation.type == OperationType.CREATE_ROOM:
         return handle_create_room_operation(operation)
+    elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_ROOM:
+        return handle_change_user_permission_for_room_operation(operation)
     elif operation.type == OperationType.ADD_ROOM_TO_ORGANIZATION:
         return handle_add_room_to_organization_operation(operation)
 
@@ -186,7 +188,7 @@ def handle_add_room_to_organization_operation(
         return OperationResponse(status=False, result={"message": str(e)})
 
 
-def handle_change_permission_for_organization_operation(
+def handle_change_user_permission_for_organization_operation(
     operation: Operation,
 ) -> OperationResponse:
     from ..models import Organization, User, UserPermissionForOrganization
@@ -222,6 +224,52 @@ def handle_change_permission_for_organization_operation(
             UserPermissionForOrganization.create(
                 user_id=user_id,
                 organization=organization,
+                permission=permission,
+            )
+
+        return OperationResponse(
+            status=True,
+            result={},
+        )
+
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_change_user_permission_for_room_operation(
+    operation: Operation,
+) -> OperationResponse:
+    from ..models import Room, User, UserPermissionForRoom
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        if user is None:
+            return OperationResponse(
+                status=False, result={"message": "User not logged in"}
+            )
+
+        room: Room = Room.get(Room.id == operation.args["room_id"])
+
+        if room.owner != user:
+            return OperationResponse(
+                status=False,
+                result={"message": "User is not the owner of the room"},
+            )
+
+        user_id = operation.args["user_id"]
+        permissions = operation.args["permissions"]
+
+        UserPermissionForRoom.delete().where(
+            (UserPermissionForRoom.user_id == user_id)
+            & (UserPermissionForRoom.room == room)
+        ).execute()
+
+        for permission in permissions:
+            UserPermissionForRoom.create(
+                user_id=user_id,
+                room=room,
                 permission=permission,
             )
 

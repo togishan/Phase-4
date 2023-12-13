@@ -173,5 +173,21 @@ if __name__ == "__main__":
             send_data(add_room_to_organization_operation)
             add_room_to_organization_operation_response = get_data()
 
+            # Change permissions of room
+            user_id = 2
+            permissions = ["WRITE"]
+            room_id = create_room_operation_response.result["room"]["id"]
+
+            change_user_permission_for_room_operation = Operation(
+                type=OperationType.CHANGE_USER_PERMISSON_FOR_ROOM,
+                args={
+                    "user_id": user_id,
+                    "room_id": room_id,
+                    "permissions": permissions,
+                },
+            )
+            send_data(change_user_permission_for_room_operation)
+            change_user_permission_for_room_operation_response = get_data()
+
     except ServerDisconnectedError:
         print("Server disconnected")
