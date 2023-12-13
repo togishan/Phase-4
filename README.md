@@ -35,8 +35,8 @@ python3 client.py --port 1424
     ...
     }
     ```
-- **X LIST**: user can list the Room objects in the organization.
-- **X ADD**: user can add new rooms to the organization.
+- **✓ LIST**: user can list the Room objects in the organization.
+- **✓ ADD**: user can add new rooms to the organization.
 - **x ACCESS**: user can access the rooms and events in the organization. Note that this can be done without LIST permission.
 - **X DELETE**: user can delete a Room in the organization if s/he also has WRITE permission on it. Owner of the Organization can delete the Room without WRITE permission. All Events in the Room are automatically deleted regardless of Event permissions.
 #### 6. Room have their own permissions

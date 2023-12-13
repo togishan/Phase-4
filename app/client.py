@@ -157,6 +157,14 @@ if __name__ == "__main__":
             send_data(create_room_operation)
             create_room_operation_response = get_data()
 
+            # Login
+            login_operation = Operation(
+                type=OperationType.LOGIN,
+                args={"username": username2, "password": password2},
+            )
+            send_data(login_operation)
+            login_operation_response = get_data()
+
             # Add room to organization
             organization_id = create_organization_operation_response.result[
                 "organization"
@@ -219,6 +227,28 @@ if __name__ == "__main__":
             )
             send_data(change_user_permission_for_event_operation)
             change_user_permission_for_event_operation_response = get_data()
+
+            # Login
+            login_operation = Operation(
+                type=OperationType.LOGIN,
+                args={"username": username1, "password": password1},
+            )
+            send_data(login_operation)
+            login_operation_response = get_data()
+
+            # List rooms of organization
+            organization_id = create_organization_operation_response.result[
+                "organization"
+            ]["id"]
+
+            list_rooms_of_organization_operation = Operation(
+                type=OperationType.LIST_ROOMS_OF_ORGANIZATION,
+                args={
+                    "organization_id": organization_id,
+                },
+            )
+            send_data(list_rooms_of_organization_operation)
+            list_rooms_of_organization_operation_response = get_data()
 
     except ServerDisconnectedError:
         print("Server disconnected")

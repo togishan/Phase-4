@@ -22,6 +22,8 @@ def handle_operation(
         return handle_change_user_permission_for_room_operation(operation)
     elif operation.type == OperationType.ADD_ROOM_TO_ORGANIZATION:
         return handle_add_room_to_organization_operation(operation)
+    elif operation.type == OperationType.LIST_ROOMS_OF_ORGANIZATION:
+        return handle_list_rooms_of_organization_operation(operation)
     elif operation.type == OperationType.CREATE_EVENT:
         return handle_create_event_operation(operation)
     elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_EVENT:
@@ -161,7 +163,13 @@ def handle_create_room_operation(operation: Operation) -> OperationResponse:
 def handle_add_room_to_organization_operation(
     operation: Operation,
 ) -> OperationResponse:
-    from ..models import Organization, Room, User, RoomInOrganization
+    from ..models import (
+        Organization,
+        Room,
+        User,
+        RoomInOrganization,
+        UserPermissionForOrganization,
+    )
     from ..dependency_manager import DependencyManager
 
     try:
@@ -175,6 +183,22 @@ def handle_add_room_to_organization_operation(
         organization: Organization = Organization.get(
             Organization.id == operation.args["organization_id"]
         )
+
+        if organization.owner != user:
+            try:
+                user_permission_for_organization: UserPermissionForOrganization = (
+                    UserPermissionForOrganization.get(
+                        (UserPermissionForOrganization.user_id == user.id)
+                        & (UserPermissionForOrganization.organization == organization)
+                        & (UserPermissionForOrganization.permission == "ADD")
+                    )
+                )
+            except Exception as e:
+                return OperationResponse(
+                    status=False,
+                    result={"message": "User does not have permission to add room"},
+                )
+
         room: Room = Room.get(Room.id == operation.args["room_id"])
 
         room_in_organization = RoomInOrganization.create(
@@ -360,5 +384,57 @@ def handle_change_user_permission_for_event_operation(
             result={},
         )
 
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_list_rooms_of_organization_operation(
+    operation: Operation,
+) -> OperationResponse:
+    from ..models import (
+        Organization,
+        RoomInOrganization,
+        User,
+        UserPermissionForOrganization,
+    )
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        if user is None:
+            return OperationResponse(
+                status=False, result={"message": "User not logged in"}
+            )
+
+        organization: Organization = Organization.get(
+            Organization.id == operation.args["organization_id"]
+        )
+
+        if organization.owner != user:
+            try:
+                user_permission_for_organization: UserPermissionForOrganization = (
+                    UserPermissionForOrganization.get(
+                        (UserPermissionForOrganization.user_id == user.id)
+                        & (UserPermissionForOrganization.organization == organization)
+                        & (UserPermissionForOrganization.permission == "LIST")
+                    )
+                )
+            except Exception as e:
+                return OperationResponse(
+                    status=False,
+                    result={"message": "User does not have permission to list rooms"},
+                )
+
+        rooms = RoomInOrganization.select().where(
+            RoomInOrganization.organization == organization
+        )
+
+        return OperationResponse(
+            status=True,
+            result={
+                "rooms": [room.to_dict() for room in rooms],
+            },
+        )
     except Exception as e:
         return OperationResponse(status=False, result={"message": str(e)})
