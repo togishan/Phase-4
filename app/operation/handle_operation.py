@@ -619,6 +619,7 @@ def handle_delete_reservation_of_room_operation(
         Room,
         User,
         UserPermissionForRoom,
+        UserPermissionForEvent,
     )
     from ..dependency_manager import DependencyManager
 
@@ -638,6 +639,15 @@ def handle_delete_reservation_of_room_operation(
                         & (UserPermissionForRoom.permission == "DELETE")
                     )
                 )
+
+                user_permission_for_event: UserPermissionForEvent = (
+                    UserPermissionForEvent.get(
+                        (UserPermissionForEvent.user_id == user.id)
+                        & (UserPermissionForEvent.event == event)
+                        & (UserPermissionForEvent.permission == "WRITE")
+                    )
+                )
+
             except Exception as e:
                 return OperationResponse(
                     status=False,
