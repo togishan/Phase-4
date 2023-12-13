@@ -459,6 +459,7 @@ def handle_delete_room_from_organization_operation(
         User,
         UserPermissionForOrganization,
         UserPermissionForRoom,
+        Event,
     )
     from ..dependency_manager import DependencyManager
 
@@ -496,6 +497,8 @@ def handle_delete_room_from_organization_operation(
                     status=False,
                     result={"message": "User does not have permission to delete rooms"},
                 )
+
+        Event.delete().where(Event.location == operation.args["room_id"]).execute()
 
         RoomInOrganization.delete().where(
             RoomInOrganization.organization
