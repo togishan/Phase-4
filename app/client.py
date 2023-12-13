@@ -319,5 +319,33 @@ if __name__ == "__main__":
             send_data(list_events_of_room_operation)
             list_events_of_room_operation_response = get_data()
 
+            # # Reserve room for event
+            # event_id = create_event_operation_response.result["event"]["id"]
+            # room_id = create_room_operation_response.result["room"]["id"]
+            # start_time = datetime.now().isoformat()
+
+            # reserve_room_for_event_operation = Operation(
+            #     type=OperationType.RESERVE_ROOM_FOR_EVENT,
+            #     args={
+            #         "event_id": event_id,
+            #         "room_id": room_id,
+            #         "start_time": start_time,
+            #     },
+            # )
+            # send_data(reserve_room_for_event_operation)
+            # reserve_room_for_event_operation_response = get_data()
+
+            # Access room
+            room_id = create_room_operation_response.result["room"]["id"]
+
+            access_room_operation = Operation(
+                type=OperationType.ACCESS_ROOM,
+                args={
+                    "room_id": room_id,
+                },
+            )
+            send_data(access_room_operation)
+            access_room_operation_response = get_data()
+
     except ServerDisconnectedError:
         print("Server disconnected")

@@ -16,6 +16,7 @@ class OperationType(str, Enum):
     LIST_ROOMS_OF_ORGANIZATION = "list_rooms_of_organization"
     DELETE_ROOM_FROM_ORGANIZATION = "delete_room_from_organization"
     DELETE_RESERVATION_OF_ROOM = "delete_reservation_of_room"
+    ACCESS_ROOM = "access_room"
 
     CREATE_EVENT = "create_event"
     CHANGE_USER_PERMISSON_FOR_EVENT = "change_user_permission_for_event"

@@ -28,6 +28,8 @@ def handle_operation(
         return handle_delete_room_from_organization_operation(operation)
     elif operation.type == OperationType.DELETE_RESERVATION_OF_ROOM:
         return handle_delete_reservation_of_room_operation(operation)
+    elif operation.type == OperationType.ACCESS_ROOM:
+        return handle_access_room_operation(operation)
     elif operation.type == OperationType.CREATE_EVENT:
         return handle_create_event_operation(operation)
     elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_EVENT:
@@ -649,6 +651,43 @@ def handle_delete_reservation_of_room_operation(
             status=True,
             result={
                 "event": event.to_dict(),
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_access_room_operation(operation: Operation) -> OperationResponse:
+    from ..models import Room, User, UserPermissionForRoom, Event
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        room: Room = Room.get(Room.id == operation.args["room_id"])
+
+        if room.owner != user:
+            try:
+                user_permission_for_room: UserPermissionForRoom = (
+                    UserPermissionForRoom.get(
+                        (UserPermissionForRoom.user_id == user.id)
+                        & (UserPermissionForRoom.room == room)
+                        & (UserPermissionForRoom.permission == "ACCESS")
+                    )
+                )
+            except Exception as e:
+                return OperationResponse(
+                    status=False,
+                    result={"message": "User does not have permission to access room"},
+                )
+
+        events = Event.select().where(Event.location == room).execute()
+
+        return OperationResponse(
+            status=True,
+            result={
+                "room": room.to_dict(),
+                "events": [event.to_dict() for event in events],
             },
         )
     except Exception as e:
