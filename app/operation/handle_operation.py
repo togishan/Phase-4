@@ -30,6 +30,10 @@ def handle_operation(
         return handle_create_event_operation(operation)
     elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_EVENT:
         return handle_change_user_permission_for_event_operation(operation)
+    elif operation.type == OperationType.RESERVE_ROOM_FOR_EVENT:
+        return handle_reserve_room_for_event_operation(operation)
+    elif operation.type == OperationType.LIST_EVENTS_OF_ROOM:
+        return handle_list_events_of_room_operation(operation)
 
 
 def handle_register_operation(operation: Operation) -> OperationResponse:
@@ -498,6 +502,103 @@ def handle_delete_room_from_organization_operation(
         return OperationResponse(
             status=True,
             result={},
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_list_events_of_room_operation(operation: Operation) -> OperationResponse:
+    from ..models import (
+        Event,
+        Room,
+        User,
+        UserPermissionForRoom,
+    )
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        room: Room = Room.get(Room.id == operation.args["room_id"])
+
+        if room.owner != user:
+            try:
+                user_permission_for_room: UserPermissionForRoom = (
+                    UserPermissionForRoom.get(
+                        (UserPermissionForRoom.user_id == user.id)
+                        & (UserPermissionForRoom.room == room)
+                        & (UserPermissionForRoom.permission == "LIST")
+                    )
+                )
+            except Exception as e:
+                return OperationResponse(
+                    status=False,
+                    result={"message": "User does not have permission to list events"},
+                )
+
+        events = Event.select().where(Event.location == room).execute()
+
+        return OperationResponse(
+            status=True,
+            result={
+                "events": [event.to_dict() for event in events],
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_reserve_room_for_event_operation(operation: Operation) -> OperationResponse:
+    from ..models import (
+        Event,
+        Room,
+        User,
+        UserPermissionForRoom,
+    )
+    from ..dependency_manager import DependencyManager
+    from datetime import datetime
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        room: Room = Room.get(Room.id == operation.args["room_id"])
+
+        event: Event = Event.get(Event.id == operation.args["event_id"])
+
+        if room.owner != user:
+            try:
+                user_permission_for_room: UserPermissionForRoom = (
+                    UserPermissionForRoom.get(
+                        (UserPermissionForRoom.user_id == user.id)
+                        & (UserPermissionForRoom.room == room)
+                        & (
+                            (UserPermissionForRoom.permission == "RESERVE")
+                            | (UserPermissionForRoom.permission == "PERRESERVE")
+                            if event.weekly is None
+                            else (UserPermissionForRoom.permission == "PERRESERVE")
+                        )
+                    )
+                )
+            except Exception as e:
+                return OperationResponse(
+                    status=False,
+                    result={
+                        "message": "User does not have permission to reserve events"
+                    },
+                )
+
+        # TODO : Check if room is available
+        # TODO : For weekly events, check if room is available for all events
+
+        event.location = room
+        event.start_time = datetime.fromisoformat(operation.args["start_time"])
+        event.save()
+
+        return OperationResponse(
+            status=True,
+            result={
+                "event": event.to_dict(),
+            },
         )
     except Exception as e:
         return OperationResponse(status=False, result={"message": str(e)})

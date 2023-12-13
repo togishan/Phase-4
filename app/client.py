@@ -2,6 +2,7 @@ import socket
 import sys
 from .operation.operation import Operation, OperationType
 from .operation.operation_response import OperationResponse, OperationResponseFactory
+from datetime import datetime
 
 HOST = "0.0.0.0"
 PORT = 65432
@@ -250,21 +251,49 @@ if __name__ == "__main__":
             send_data(list_rooms_of_organization_operation)
             list_rooms_of_organization_operation_response = get_data()
 
-            # Delete room
-            room_id = create_room_operation_response.result["room"]["id"]
-            organization_id = create_organization_operation_response.result[
-                "organization"
-            ]["id"]
+            # # Delete room
+            # room_id = create_room_operation_response.result["room"]["id"]
+            # organization_id = create_organization_operation_response.result[
+            #     "organization"
+            # ]["id"]
 
-            delete_room_operation = Operation(
-                type=OperationType.DELETE_ROOM_FROM_ORGANIZATION,
+            # delete_room_operation = Operation(
+            #     type=OperationType.DELETE_ROOM_FROM_ORGANIZATION,
+            #     args={
+            #         "room_id": room_id,
+            #         "organization_id": organization_id,
+            #     },
+            # )
+            # send_data(delete_room_operation)
+            # delete_room_operation_response = get_data()
+
+            # Reserve room for event
+            event_id = create_event_operation_response.result["event"]["id"]
+            room_id = create_room_operation_response.result["room"]["id"]
+            start_time = datetime.now().isoformat()
+
+            reserve_room_for_event_operation = Operation(
+                type=OperationType.RESERVE_ROOM_FOR_EVENT,
                 args={
+                    "event_id": event_id,
                     "room_id": room_id,
-                    "organization_id": organization_id,
+                    "start_time": start_time,
                 },
             )
-            send_data(delete_room_operation)
-            delete_room_operation_response = get_data()
+            send_data(reserve_room_for_event_operation)
+            reserve_room_for_event_operation_response = get_data()
+
+            # List events of room
+            room_id = create_room_operation_response.result["room"]["id"]
+
+            list_events_of_room_operation = Operation(
+                type=OperationType.LIST_EVENTS_OF_ROOM,
+                args={
+                    "room_id": room_id,
+                },
+            )
+            send_data(list_events_of_room_operation)
+            list_events_of_room_operation_response = get_data()
 
     except ServerDisconnectedError:
         print("Server disconnected")

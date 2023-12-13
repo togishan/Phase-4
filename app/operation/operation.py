@@ -18,6 +18,8 @@ class OperationType(str, Enum):
 
     CREATE_EVENT = "create_event"
     CHANGE_USER_PERMISSON_FOR_EVENT = "change_user_permission_for_event"
+    RESERVE_ROOM_FOR_EVENT = "reserve_room_for_event"
+    LIST_EVENTS_OF_ROOM = "list_events_of_room"
 
 
 class InvalidOperationFormatError(Exception):

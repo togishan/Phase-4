@@ -1,5 +1,6 @@
 from peewee import *
 from enum import Enum
+from datetime import datetime
 
 db = SqliteDatabase("database.db")
 
@@ -121,7 +122,7 @@ class Event(BaseModel):
             "category": self.category,
             "capacity": self.capacity,
             "duration": self.duration,
-            "start_time": self.start_time,
+            "start_time": self.start_time.isoformat() if self.start_time else None,
             "location": self.location.to_dict() if self.location else None,
             "weekly": self.weekly,
         }
