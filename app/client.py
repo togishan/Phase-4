@@ -58,23 +58,34 @@ if __name__ == "__main__":
 
             s.connect((HOST, PORT))
 
-            username = "test_username"
-            password = "test_password"
-            name = "test_name"
+            username1 = "test1"
+            password1 = "test1"
+            name1 = "test_name1"
 
-            # Register
-            register_operation = Operation(
+            # Register user1
+            register_operation1 = Operation(
                 type=OperationType.REGISTER,
-                args={"username": username, "password": password, "name": name},
+                args={"username": username1, "password": password1, "name": name1},
             )
 
-            send_data(register_operation)
-            register_operation_response = get_data()
+            username2 = "test2"
+            password2 = "test2"
+            name2 = "test_name2"
+            send_data(register_operation1)
+            register_operation1_response = get_data()
+
+            # Register user2
+            register_operation2 = Operation(
+                type=OperationType.REGISTER,
+                args={"username": username2, "password": password2, "name": name2},
+            )
+            send_data(register_operation2)
+            register_operation2_response = get_data()
 
             # Login
             login_operation = Operation(
                 type=OperationType.LOGIN,
-                args={"username": username, "password": password},
+                args={"username": username1, "password": password1},
             )
             send_data(login_operation)
             login_operation_response = get_data()
@@ -94,6 +105,42 @@ if __name__ == "__main__":
             )
             send_data(create_organization_operation)
             create_organization_operation_response = get_data()
+
+            # Change permissions of organization
+            user_id = 2
+            permissions = ["LIST"]
+            organization_id = create_organization_operation_response.result[
+                "organization"
+            ]["id"]
+
+            change_permissions_of_organization_operation = Operation(
+                type=OperationType.CHANGE_USER_PERMISSON_FOR_ORGANIZATION,
+                args={
+                    "user_id": user_id,
+                    "organization_id": organization_id,
+                    "permissions": permissions,
+                },
+            )
+            send_data(change_permissions_of_organization_operation)
+            change_permissions_of_organization_operation_response = get_data()
+
+            # Change permissions of organization again
+            user_id = 2
+            permissions = ["ADD"]
+            organization_id = create_organization_operation_response.result[
+                "organization"
+            ]["id"]
+
+            change_permissions_of_organization_operation = Operation(
+                type=OperationType.CHANGE_USER_PERMISSON_FOR_ORGANIZATION,
+                args={
+                    "user_id": user_id,
+                    "organization_id": organization_id,
+                    "permissions": permissions,
+                },
+            )
+            send_data(change_permissions_of_organization_operation)
+            change_permissions_of_organization_operation_response = get_data()
 
             # Create room
             create_room_operation = Operation(

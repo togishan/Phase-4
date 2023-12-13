@@ -8,6 +8,7 @@ class OperationType(str, Enum):
     REGISTER = "register"
 
     CREATE_ORGANIZATION = "create_organization"
+    CHANGE_USER_PERMISSON_FOR_ORGANIZATION = "change_user_permission_for_organization"
 
     CREATE_ROOM = "create_room"
     ADD_ROOM_TO_ORGANIZATION = "add_room_to_organization"
