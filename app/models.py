@@ -114,18 +114,33 @@ class Event(BaseModel):
     weekly = DateTimeField(null=True)
 
     def to_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "description": self.description,
-            "owner": self.owner.to_dict(),
-            "category": self.category,
-            "capacity": self.capacity,
-            "duration": self.duration,
-            "start_time": self.start_time.isoformat() if self.start_time else None,
-            "location": self.location.to_dict() if self.location else None,
-            "weekly": self.weekly,
-        }
+        from .dependency_manager import DependencyManager
+
+        user: User = DependencyManager.get(User)
+
+        try:
+            if user.id != self.owner.id:
+                UserPermissionForEvent.get(
+                    (UserPermissionForEvent.user_id == user.id)
+                    & (UserPermissionForEvent.event_id == self.id)
+                    & (UserPermissionForEvent.permission == "READ")
+                )
+
+            return {
+                "id": self.id,
+                "title": self.title,
+                "description": self.description,
+                "owner": self.owner.to_dict(),
+                "category": self.category,
+                "capacity": self.capacity,
+                "duration": self.duration,
+                "start_time": self.start_time.isoformat() if self.start_time else None,
+                "location": self.location.to_dict() if self.location else None,
+                "weekly": self.weekly,
+            }
+
+        except:
+            return {"title": "No permission to view this event"}
 
 
 class UserPermissionForEvent(BaseModel):
