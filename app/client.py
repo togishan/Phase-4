@@ -250,5 +250,21 @@ if __name__ == "__main__":
             send_data(list_rooms_of_organization_operation)
             list_rooms_of_organization_operation_response = get_data()
 
+            # Delete room
+            room_id = create_room_operation_response.result["room"]["id"]
+            organization_id = create_organization_operation_response.result[
+                "organization"
+            ]["id"]
+
+            delete_room_operation = Operation(
+                type=OperationType.DELETE_ROOM_FROM_ORGANIZATION,
+                args={
+                    "room_id": room_id,
+                    "organization_id": organization_id,
+                },
+            )
+            send_data(delete_room_operation)
+            delete_room_operation_response = get_data()
+
     except ServerDisconnectedError:
         print("Server disconnected")

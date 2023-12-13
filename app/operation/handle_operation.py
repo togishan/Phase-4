@@ -24,6 +24,8 @@ def handle_operation(
         return handle_add_room_to_organization_operation(operation)
     elif operation.type == OperationType.LIST_ROOMS_OF_ORGANIZATION:
         return handle_list_rooms_of_organization_operation(operation)
+    elif operation.type == OperationType.DELETE_ROOM_FROM_ORGANIZATION:
+        return handle_delete_room_from_organization_operation(operation)
     elif operation.type == OperationType.CREATE_EVENT:
         return handle_create_event_operation(operation)
     elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_EVENT:
@@ -426,15 +428,76 @@ def handle_list_rooms_of_organization_operation(
                     result={"message": "User does not have permission to list rooms"},
                 )
 
-        rooms = RoomInOrganization.select().where(
+        RoomInOrganization.select().where(
             RoomInOrganization.organization == organization
-        )
+        ).execute()
+
+        # TODO : Also remove events of the room
 
         return OperationResponse(
             status=True,
-            result={
-                "rooms": [room.to_dict() for room in rooms],
-            },
+            result={},
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_delete_room_from_organization_operation(
+    operation: Operation,
+) -> OperationResponse:
+    from ..models import (
+        Organization,
+        RoomInOrganization,
+        User,
+        UserPermissionForOrganization,
+        UserPermissionForRoom,
+    )
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        if user is None:
+            return OperationResponse(
+                status=False, result={"message": "User not logged in"}
+            )
+
+        organization: Organization = Organization.get(
+            Organization.id == operation.args["organization_id"]
+        )
+
+        if organization.owner != user:
+            try:
+                user_permission_for_organization: UserPermissionForOrganization = (
+                    UserPermissionForOrganization.get(
+                        (UserPermissionForOrganization.user_id == user.id)
+                        & (UserPermissionForOrganization.organization == organization)
+                        & (UserPermissionForOrganization.permission == "DELETE")
+                    )
+                )
+
+                user_permission_for_room: UserPermissionForRoom = (
+                    UserPermissionForRoom.get(
+                        (UserPermissionForRoom.user_id == user.id)
+                        & (UserPermissionForRoom.room == operation.args["room_id"])
+                        & (UserPermissionForRoom.permission == "DELETE")
+                    )
+                )
+            except Exception as e:
+                return OperationResponse(
+                    status=False,
+                    result={"message": "User does not have permission to delete rooms"},
+                )
+
+        RoomInOrganization.delete().where(
+            RoomInOrganization.organization
+            == organization & RoomInOrganization.room
+            == operation.args["room_id"],
+        ).execute()
+
+        return OperationResponse(
+            status=True,
+            result={},
         )
     except Exception as e:
         return OperationResponse(status=False, result={"message": str(e)})
