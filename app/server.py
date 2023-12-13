@@ -5,7 +5,6 @@ import sys
 from .operation.operation import (
     Operation,
     InvalidOperationFormatError,
-    OperationType,
     OperationFactory,
 )
 from .operation.operation_response import OperationResponse
@@ -28,9 +27,12 @@ def handle_client(conn: socket.socket, addr):
         data_len = int.from_bytes(data_len_bytes, "big")
 
         operation_bytes = conn.recv(data_len)
-        return OperationFactory.deserialize(operation_bytes)
+        operation = OperationFactory.deserialize(operation_bytes)
+        print(f"Received {operation}")
+        return operation
 
     def send_data(operation_response: OperationResponse):
+        print(f"Sending {operation_response}")
         response_bytes = operation_response.serialize()
 
         response_len = len(response_bytes)
@@ -39,8 +41,6 @@ def handle_client(conn: socket.socket, addr):
         conn.sendall(response_len_bytes)
         conn.sendall(response_bytes)
 
-    authenticated_user_id = None
-
     try:
         with conn:
             print(f"Connected by {addr}")
@@ -48,34 +48,17 @@ def handle_client(conn: socket.socket, addr):
                 # Parse incoming data to Operation
                 try:
                     incoming_operation = get_data()
-                    print(f"Received {incoming_operation}")
                 except InvalidOperationFormatError:
                     operation_response = OperationResponse(
                         status=False,
                         result={"message": "Invalid operation format"},
                     )
-                    print(f"Sending {operation_response}")
                     send_data(operation_response)
                     continue
 
                 # Handle operation
-                operation_response = handle_operation(
-                    incoming_operation, authenticated_user_id
-                )
+                operation_response = handle_operation(incoming_operation)
 
-                if (
-                    incoming_operation.type == OperationType.LOGIN
-                    and operation_response.status
-                ):
-                    authenticated_user_id = operation_response.result["user_id"]
-
-                elif (
-                    incoming_operation.type == OperationType.LOGOUT
-                    and operation_response.status
-                ):
-                    authenticated_user_id = None
-
-                print(f"Sending {operation_response}")
                 send_data(operation_response)
     except ClientDisconnectedError:
         print(f"Client {addr} disconnected")

@@ -5,6 +5,7 @@ import json
 class OperationType(str, Enum):
     LOGIN = "login"
     LOGOUT = "logout"
+    REGISTER = "register"
 
 
 class InvalidOperationFormatError(Exception):

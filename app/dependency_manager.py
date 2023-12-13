@@ -8,3 +8,7 @@ class DependencyManager:
     @staticmethod
     def get(type: type) -> object | None:
         return DependencyManager.objects[type]
+
+    @staticmethod
+    def unregister(type: type) -> None:
+        del DependencyManager.objects[type]

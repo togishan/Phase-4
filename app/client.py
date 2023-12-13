@@ -34,6 +34,7 @@ if __name__ == "__main__":
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
             def send_data(operation: Operation):
+                print(f"Sending {operation}")
                 response_bytes = operation.serialize()
 
                 response_len = len(response_bytes)
@@ -49,17 +50,42 @@ if __name__ == "__main__":
                 data_len = int.from_bytes(data_len_bytes, "big")
 
                 operation_response_bytes = s.recv(data_len)
-                return OperationResponseFactory.deserialize(operation_response_bytes)
+                operation_response = OperationResponseFactory.deserialize(
+                    operation_response_bytes
+                )
+                print(f"Received {operation_response}")
+                return operation_response
 
             s.connect((HOST, PORT))
 
-            dummy_operation = Operation(type=OperationType.LOGIN, args={})
-            print(f"Sending {dummy_operation}")
+            username = "test_username"
+            password = "test_password"
+            name = "test_name"
 
-            send_data(dummy_operation)
+            # Register
+            register_operation = Operation(
+                type=OperationType.REGISTER,
+                args={"username": username, "password": password, "name": name},
+            )
 
-            while True:
-                operation_response = get_data()
-                print(f"Received {operation_response}")
+            send_data(register_operation)
+            register_operation_response = get_data()
+
+            # Login
+            login_operation = Operation(
+                type=OperationType.LOGIN,
+                args={"username": username, "password": password},
+            )
+            send_data(login_operation)
+            login_operation_response = get_data()
+
+            # Logout
+            logout_operation = Operation(
+                type=OperationType.LOGOUT,
+                args={},
+            )
+            send_data(logout_operation)
+            logout_operation_response = get_data()
+
     except ServerDisconnectedError:
         print("Server disconnected")
