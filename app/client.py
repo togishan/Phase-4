@@ -295,5 +295,29 @@ if __name__ == "__main__":
             send_data(list_events_of_room_operation)
             list_events_of_room_operation_response = get_data()
 
+            # Delete reservation of room
+            event_id = create_event_operation_response.result["event"]["id"]
+
+            delete_reservation_of_room_operation = Operation(
+                type=OperationType.DELETE_RESERVATION_OF_ROOM,
+                args={
+                    "event_id": event_id,
+                },
+            )
+            send_data(delete_reservation_of_room_operation)
+            delete_reservation_of_room_operation_response = get_data()
+
+            # List events of room
+            room_id = create_room_operation_response.result["room"]["id"]
+
+            list_events_of_room_operation = Operation(
+                type=OperationType.LIST_EVENTS_OF_ROOM,
+                args={
+                    "room_id": room_id,
+                },
+            )
+            send_data(list_events_of_room_operation)
+            list_events_of_room_operation_response = get_data()
+
     except ServerDisconnectedError:
         print("Server disconnected")

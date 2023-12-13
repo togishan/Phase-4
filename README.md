@@ -53,7 +53,7 @@ room.
 - **✓ LIST**: user can list and view the Event reservations for the room.
 - **✓ RESERVE:**: user can reserve the room.
 - **✓ PERRESERVE:**: user can reserve the room for periodic events. Implies RESERVE.
-- **x DELETE**: user can delete the reservations for the room.
+- **✓ DELETE**: user can delete the reservations for the room.
 - **x LIST**: user can list and view the Event reservations for the room. It requires WRITE permission on the Event. Owner of the Room can delete any events WRITE permission on event.
 
 

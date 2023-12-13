@@ -26,6 +26,8 @@ def handle_operation(
         return handle_list_rooms_of_organization_operation(operation)
     elif operation.type == OperationType.DELETE_ROOM_FROM_ORGANIZATION:
         return handle_delete_room_from_organization_operation(operation)
+    elif operation.type == OperationType.DELETE_RESERVATION_OF_ROOM:
+        return handle_delete_reservation_of_room_operation(operation)
     elif operation.type == OperationType.CREATE_EVENT:
         return handle_create_event_operation(operation)
     elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_EVENT:
@@ -592,6 +594,55 @@ def handle_reserve_room_for_event_operation(operation: Operation) -> OperationRe
 
         event.location = room
         event.start_time = datetime.fromisoformat(operation.args["start_time"])
+        event.save()
+
+        return OperationResponse(
+            status=True,
+            result={
+                "event": event.to_dict(),
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_delete_reservation_of_room_operation(
+    operation: Operation,
+) -> OperationResponse:
+    from ..models import (
+        Event,
+        Room,
+        User,
+        UserPermissionForRoom,
+    )
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        event: Event = Event.get(Event.id == operation.args["event_id"])
+
+        room: Room = event.location
+
+        if room.owner != user:
+            try:
+                user_permission_for_room: UserPermissionForRoom = (
+                    UserPermissionForRoom.get(
+                        (UserPermissionForRoom.user_id == user.id)
+                        & (UserPermissionForRoom.room == room)
+                        & (UserPermissionForRoom.permission == "DELETE")
+                    )
+                )
+            except Exception as e:
+                return OperationResponse(
+                    status=False,
+                    result={
+                        "message": "User does not have permission to delete events"
+                    },
+                )
+
+        event.location = None
+        event.start_time = None
         event.save()
 
         return OperationResponse(
