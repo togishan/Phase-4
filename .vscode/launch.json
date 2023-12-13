@@ -5,12 +5,28 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Run Main",
+      "name": "Run Server",
       "type": "python",
       "request": "launch",
-      "module": "app.main",
+      "module": "app.server",
       "console": "integratedTerminal",
-      "justMyCode": true
+      "justMyCode": true,
+      "args": [
+        "--port",
+        "65432"
+      ]
+    },
+    {
+      "name": "Run Client",
+      "type": "python",
+      "request": "launch",
+      "module": "app.client",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "args": [
+        "--port",
+        "65432"
+      ]
     }
   ]
 }
