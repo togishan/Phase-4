@@ -189,5 +189,36 @@ if __name__ == "__main__":
             send_data(change_user_permission_for_room_operation)
             change_user_permission_for_room_operation_response = get_data()
 
+            # Create event
+            create_event_operation = Operation(
+                type=OperationType.CREATE_EVENT,
+                args={
+                    "title": "test_event",
+                    "description": "test_description",
+                    "category": "STUDY",
+                    "capacity": 100,
+                    "duration": 60,
+                    "weekly": None,
+                },
+            )
+            send_data(create_event_operation)
+            create_event_operation_response = get_data()
+
+            # Change permissions of event
+            user_id = 2
+            permissions = ["WRITE"]
+            event_id = create_event_operation_response.result["event"]["id"]
+
+            change_user_permission_for_event_operation = Operation(
+                type=OperationType.CHANGE_USER_PERMISSON_FOR_EVENT,
+                args={
+                    "user_id": user_id,
+                    "event_id": event_id,
+                    "permissions": permissions,
+                },
+            )
+            send_data(change_user_permission_for_event_operation)
+            change_user_permission_for_event_operation_response = get_data()
+
     except ServerDisconnectedError:
         print("Server disconnected")

@@ -22,6 +22,10 @@ def handle_operation(
         return handle_change_user_permission_for_room_operation(operation)
     elif operation.type == OperationType.ADD_ROOM_TO_ORGANIZATION:
         return handle_add_room_to_organization_operation(operation)
+    elif operation.type == OperationType.CREATE_EVENT:
+        return handle_create_event_operation(operation)
+    elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_EVENT:
+        return handle_change_user_permission_for_event_operation(operation)
 
 
 def handle_register_operation(operation: Operation) -> OperationResponse:
@@ -270,6 +274,84 @@ def handle_change_user_permission_for_room_operation(
             UserPermissionForRoom.create(
                 user_id=user_id,
                 room=room,
+                permission=permission,
+            )
+
+        return OperationResponse(
+            status=True,
+            result={},
+        )
+
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_create_event_operation(operation: Operation) -> OperationResponse:
+    from ..models import Event, User
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        if user is None:
+            return OperationResponse(
+                status=False, result={"message": "User not logged in"}
+            )
+
+        event: Event = Event.create(
+            title=operation.args["title"],
+            description=operation.args["description"],
+            owner=user,
+            category=operation.args["category"],
+            capacity=operation.args["capacity"],
+            duration=operation.args["duration"],
+            weekly=operation.args["weekly"],
+        )
+
+        return OperationResponse(
+            status=True,
+            result={
+                "event": event.to_dict(),
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_change_user_permission_for_event_operation(
+    operation: Operation,
+) -> OperationResponse:
+    from ..models import Event, User, UserPermissionForEvent
+    from ..dependency_manager import DependencyManager
+
+    try:
+        user: User = DependencyManager.get(User)
+
+        if user is None:
+            return OperationResponse(
+                status=False, result={"message": "User not logged in"}
+            )
+
+        event: Event = Event.get(Event.id == operation.args["event_id"])
+
+        if event.owner != user:
+            return OperationResponse(
+                status=False,
+                result={"message": "User is not the owner of the event"},
+            )
+
+        user_id = operation.args["user_id"]
+        permissions = operation.args["permissions"]
+
+        UserPermissionForEvent.delete().where(
+            (UserPermissionForEvent.user_id == user_id)
+            & (UserPermissionForEvent.event == event)
+        ).execute()
+
+        for permission in permissions:
+            UserPermissionForEvent.create(
+                user_id=user_id,
+                event=event,
                 permission=permission,
             )
 

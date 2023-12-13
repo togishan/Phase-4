@@ -95,6 +95,7 @@ class RoomInOrganization(BaseModel):
 class Event(BaseModel):
     title = CharField(max_length=256)
     description = CharField(max_length=256)
+    owner = ForeignKeyField(User, backref="events")
     category = CharField(
         max_length=256,
         choices=(
@@ -111,6 +112,29 @@ class Event(BaseModel):
     location = ForeignKeyField(Room, backref="events", null=True)
     weekly = DateTimeField(null=True)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "owner": self.owner.to_dict(),
+            "category": self.category,
+            "capacity": self.capacity,
+            "duration": self.duration,
+            "start_time": self.start_time,
+            "location": self.location.to_dict() if self.location else None,
+            "weekly": self.weekly,
+        }
+
+
+class UserPermissionForEvent(BaseModel):
+    user = ForeignKeyField(User, backref="permissions")
+    event = ForeignKeyField(Event, backref="permissions")
+    permission = CharField(
+        max_length=256,
+        choices=(("WRITE", "WRITE")),
+    )
+
 
 if __name__ == "__main__":
     # Create tables if they don't exist
@@ -125,6 +149,7 @@ if __name__ == "__main__":
             UserPermissionForRoom,
             RoomInOrganization,
             Event,
+            UserPermissionForEvent,
         ]
     )
     db.close()
