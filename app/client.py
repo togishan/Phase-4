@@ -1,12 +1,15 @@
 import socket
-import json
-import time
 import sys
-from .operation.operation import Operation
-from .operation.operation_response import OperationResponse
+from .operation.operation import Operation, OperationType
+from .operation.operation_response import OperationResponse, OperationResponseFactory
 
 HOST = "0.0.0.0"
 PORT = 65432
+
+
+class ServerDisconnectedError(Exception):
+    pass
+
 
 if __name__ == "__main__":
     args = sys.argv
@@ -27,35 +30,36 @@ if __name__ == "__main__":
         print("PORT must be an integer")
         sys.exit(1)
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
-        def send_data(data: dict):
-            print(f"Sending data: {data}")
-            response_str = json.dumps(data)
-            response_bytes = response_str.encode("utf-8")
-            response_len = len(response_bytes)
-            print(f"Sending data length: {response_len}")
-            response_len_bytes = response_len.to_bytes(4, "big")
-            s.sendall(response_len_bytes)
-            s.sendall(response_bytes)
+            def send_data(operation: Operation):
+                response_bytes = operation.serialize()
 
-        def get_data() -> OperationResponse:
-            data_len_bytes = s.recv(4)
-            data_len = int.from_bytes(data_len_bytes, "big")
-            print(f"Received data length: {data_len}")
-            data = s.recv(data_len)
-            data_str = data.decode("utf-8")
-            data_json = json.loads(data_str)
-            print(f"Received data: {data_json}")
-            return OperationResponse(data_json)
+                response_len = len(response_bytes)
+                response_len_bytes = response_len.to_bytes(4, "big")
 
-        s.connect((HOST, PORT))
+                s.sendall(response_len_bytes)
+                s.sendall(response_bytes)
 
-        dummy_operation_json = {"name": "dummy", "args": {}}
-        send_data(dummy_operation_json)
+            def get_data() -> OperationResponse:
+                data_len_bytes = s.recv(4)
+                if not data_len_bytes:
+                    raise ServerDisconnectedError()
+                data_len = int.from_bytes(data_len_bytes, "big")
 
-        while True:
-            try:
+                operation_response_bytes = s.recv(data_len)
+                return OperationResponseFactory.deserialize(operation_response_bytes)
+
+            s.connect((HOST, PORT))
+
+            dummy_operation = Operation(type=OperationType.LOGIN, args={})
+            print(f"Sending {dummy_operation}")
+
+            send_data(dummy_operation)
+
+            while True:
                 operation_response = get_data()
-            except:
-                print("Cannot parse operation response")
+                print(f"Received {operation_response}")
+    except ServerDisconnectedError:
+        print("Server disconnected")

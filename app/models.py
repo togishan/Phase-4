@@ -11,6 +11,7 @@ class BaseModel(Model):
 
 class User(BaseModel):
     name = CharField(max_length=256)
+    username = CharField(max_length=256)
     password = CharField(max_length=256)
 
 
