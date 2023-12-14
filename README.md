@@ -23,10 +23,10 @@ python3 client.py --port 1424
 #### 3. Persistent Storage
 - **✓** SQLite will be used as the database. Database will be stored in a file.
 #### 4. Server-Sent Notifications
-- **x** Server should be able to send notifications to clients according to their view when there is a change in the any object inside the view.
-- **x** There is only one View object per user. 
-- **x** User will be notified for all events in the matching query definitions for the View. 
-- **x** Note that permissions changes may also trigger notifications.
+- **✓** Server should be able to send notifications to clients according to their view when there is a change in the any object inside the view.
+- **✓** There is only one View object per user. 
+- **✓** User will be notified for all events in the matching query definitions for the View. 
+- **✓** Note that permissions changes may also trigger notifications.
 #### 5. Organization Permissions
 - **✓** Organization objects will have a dictionary of permissions. Permissions will be in the form of
     ```
