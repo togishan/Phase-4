@@ -78,7 +78,13 @@ class UserPermissionForRoom(BaseModel):
     room = ForeignKeyField(Room, backref="permissions")
     permission = CharField(
         max_length=256,
-        choices=(("WRITE", "WRITE")),
+        choices=(
+            ("WRITE", "WRITE"),
+            ("LIST", "LIST"),
+            ("RESERVE", "RESERVE"),
+            ("PERRESERVE", "PERRESERVE"),
+            ("DELETE", "DELETE"),
+        ),
     )
 
 
