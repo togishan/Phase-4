@@ -984,8 +984,39 @@ def handle_find_room_schedule_of_organization_for_events_operation(
 def handle_rereserve_room_for_event_operation(
     operation: Operation,
 ) -> OperationResponse:
-    # TODO : Implement
-    return OperationResponse(status=False, result={"message": "Not implemented"})
+    from ..models import Event
+    from .utils import is_room_available
+    from datetime import timedelta
+
+    try:
+        event_id = operation.args["event_id"]
+        room_id = operation.args["room_id"]
+
+        event = Event.get(Event.id == event_id)
+
+        if is_room_available(
+            room_id,
+            event.start_time,
+            event.start_time + timedelta(minutes=event.duration),
+        ):
+            event.location_id = room_id
+            event.save()
+            return OperationResponse(
+                status=True,
+                result={
+                    "event": event.to_dict(),
+                },
+            )
+
+        return OperationResponse(
+            status=False,
+            result={
+                "message": "Room is not available for this event",
+            },
+        )
+
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
 
 
 def handle_add_query_operation(operation: Operation) -> OperationResponse:
