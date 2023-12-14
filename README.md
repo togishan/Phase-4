@@ -69,3 +69,13 @@ not granted room will be displayed as BUSY without any other detail.
 -  **✓ WRITE**: User can update and delete (if Room has DELETE too) the Event.
 #### 8. View
 - **x** roomView and dayView commands result on a list of tables, a table per matching Room and a table per matching Day respectively.
+
+#### 8. Additional Operations
+1. **x** `findRoom(event, rect, start, end)`: Find and return Room objecst within the rectangle and available in the interval defined by start and end. Room capacities should match the Event. It returns an iterator.
+2. **x** `findSchedule(eventlist, rect, start, end)`: It tries to find a schedule for a group of events. The schedule should be compatible with existing room assignments and it should not have any conflict.
+3. **x** `reassign(event, room)`: Change existing reservation of the event to new room. If request is valid, old reservation is cancelled and new reservation is made.
+4. **x** `query(rect, title, category, room)`: It returns (event, room, start) tuples
+5. **x** `addquery(organization,**kw)`: The query method parameters are registered in the view with the organization object
+6. **x** `delquery(qid)`: Query is deleted from the view
+7. **x** `roomView(start, end)`: The queries in the view are executed and a room based result is generated. A dictionary with room titles as keys are returned. Each room will have the query results reported for the room are listed. Rooms without an event are skipped.
+8. **x** `dayView(start, end)`: The queries in the view are executed and a daily result is generated. A dictionary with days are returned. Each day will have the query results reported for the day are included. Days without an event are skipped.
