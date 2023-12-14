@@ -141,6 +141,12 @@ def handle_create_room_operation(operation: Operation) -> OperationResponse:
     from ..models import Room, User
     from ..dependency_manager import DependencyManager
 
+    import re
+
+    def is_valid_time_of_day_format(input_string: str) -> bool:
+        pattern = re.compile(r"^([01]?[0-9]|2[0-3]):[0-5][0-9]$")
+        return bool(pattern.match(input_string))
+
     try:
         user: User = DependencyManager.get(User)
 
@@ -149,13 +155,22 @@ def handle_create_room_operation(operation: Operation) -> OperationResponse:
                 status=False, result={"message": "User not logged in"}
             )
 
+        if not is_valid_time_of_day_format(operation.args["open_time"]):
+            return OperationResponse(
+                status=False, result={"message": "Invalid open time format"}
+            )
+
+        if not is_valid_time_of_day_format(operation.args["close_time"]):
+            return OperationResponse(
+                status=False, result={"message": "Invalid close time format"}
+            )
+
         room: Room = Room.create(
             name=operation.args["name"],
             owner=user,
             x=operation.args["x"],
             y=operation.args["y"],
             capacity=operation.args["capacity"],
-            # TODO : Validate time format
             open_time=operation.args["open_time"],
             close_time=operation.args["close_time"],
         )
