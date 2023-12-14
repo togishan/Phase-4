@@ -440,8 +440,6 @@ def handle_list_rooms_of_organization_operation(
             RoomInOrganization.organization == organization
         ).execute()
 
-        # TODO : Also remove events of the room
-
         return OperationResponse(
             status=True,
             result={},
