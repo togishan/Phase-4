@@ -747,9 +747,11 @@ def handle_access_room_operation(operation: Operation) -> OperationResponse:
 
 def handle_query_organization_operation(operation: Operation) -> OperationResponse:
     from .utils import is_inside_rectangle
-    from ..models import Room
+    from ..models import Room, Organization, RoomInOrganization, Event
 
     try:
+        organization_id = operation.args["organization_id"]
+
         top_right_x = operation.args["top_right_x"]
         top_right_y = operation.args["top_right_y"]
         bottom_left_x = operation.args["bottom_left_x"]
@@ -759,13 +761,13 @@ def handle_query_organization_operation(operation: Operation) -> OperationRespon
         title = operation.args["title"]
         category = operation.args["category"]
 
-        room = Room.get(Room.id == room_id)
-        events_of_room = room.events
-
         #  def query(self, rect: Rectangle, title: str, category: str, room: Room = None):
         return_list = []
         # do everything with room
         if room_id:
+            room = Room.get(Room.id == room_id)
+            events_of_room = room.events
+
             for assignment in events_of_room:
                 if (
                     assignment.title == title
@@ -778,7 +780,21 @@ def handle_query_organization_operation(operation: Operation) -> OperationRespon
 
         # do everything with rect
         else:
-            for assignment in events_of_room:
+            organization = Organization.get(Organization.id == organization_id)
+            room_in_organizations = RoomInOrganization.select().where(
+                RoomInOrganization.organization == organization
+            )
+
+            events = Event.select().where(
+                Event.location.in_(
+                    [
+                        room_in_organization.room.id
+                        for room_in_organization in room_in_organizations
+                    ]
+                )
+            )
+
+            for assignment in events:
                 if (
                     assignment.title == title
                     and assignment.category.value == category
@@ -1020,13 +1036,53 @@ def handle_rereserve_room_for_event_operation(
 
 
 def handle_add_query_operation(operation: Operation) -> OperationResponse:
-    # TODO : Implement
-    return OperationResponse(status=False, result={"message": "Not implemented"})
+    from ..dependency_manager import DependencyManager
+    from uuid import UUID, uuid4
+    from multiprocessing import Semaphore
+    from .operation import Operation
+
+    try:
+        query_dict = DependencyManager.get(dict)
+        notification_thread_id = DependencyManager.get(UUID)
+        notification_semaphore = DependencyManager.get(Semaphore)
+
+        query_entry = {
+            "notification_thread_id": notification_thread_id,
+            "semaphore": notification_semaphore,
+            "query": Operation(
+                type=OperationType.QUERY_ORGANIZATION, args=operation.args
+            ),
+        }
+
+        query_id = str(uuid4())
+
+        query_dict[query_id] = query_entry
+
+        return OperationResponse(
+            status=True,
+            result={
+                "query_id": query_id,
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
 
 
 def handle_del_query_operation(operation: Operation) -> OperationResponse:
-    # TODO : Implement
-    return OperationResponse(status=False, result={"message": "Not implemented"})
+    from ..dependency_manager import DependencyManager
+
+    try:
+        query_id = operation.args["query_id"]
+        query_dict: dict = DependencyManager.get(dict)
+
+        query_dict.pop(query_id)
+
+        return OperationResponse(
+            status=True,
+            result={},
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
 
 
 def handle_room_view_operation(operation: Operation) -> OperationResponse:

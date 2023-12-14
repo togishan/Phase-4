@@ -1,45 +1,32 @@
 import socket
-from multiprocessing import Process
+from multiprocessing import Process, Manager, Semaphore
 import sys
+from .dependency_manager import DependencyManager
 
 from .operation.operation import (
-    Operation,
     InvalidOperationFormatError,
     OperationFactory,
 )
 from .operation.operation_response import OperationResponse
 from .operation.handle_operation import handle_operation
+from uuid import uuid4, UUID
+
+from .server_utils import ClientDisconnectedError, get_data, send_data
 
 HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
 PORT = None  # Port to listen on (non-privileged ports are > 1023)
 
 
-class ClientDisconnectedError(Exception):
-    pass
-
-
-def handle_client(conn: socket.socket, addr):
-    def get_data() -> Operation:
-        data_len_bytes = conn.recv(4)
-        if not data_len_bytes:
-            raise ClientDisconnectedError()
-
-        data_len = int.from_bytes(data_len_bytes, "big")
-
-        operation_bytes = conn.recv(data_len)
-        operation = OperationFactory.deserialize(operation_bytes)
-        print(f"Received {operation}")
-        return operation
-
-    def send_data(operation_response: OperationResponse):
-        print(f"Sending {operation_response}")
-        response_bytes = operation_response.serialize()
-
-        response_len = len(response_bytes)
-        response_len_bytes = response_len.to_bytes(4, "big")
-
-        conn.sendall(response_len_bytes)
-        conn.sendall(response_bytes)
+def handle_client(
+    conn: socket.socket,
+    addr,
+    query_dict: dict,
+    notification_semaphore: Semaphore,
+    notification_thread_id: UUID,
+):
+    DependencyManager.register(dict, query_dict)
+    DependencyManager.register(Semaphore, notification_semaphore)
+    DependencyManager.register(UUID, notification_thread_id)
 
     try:
         with conn:
@@ -47,21 +34,44 @@ def handle_client(conn: socket.socket, addr):
             while True:
                 # Parse incoming data to Operation
                 try:
-                    incoming_operation = get_data()
+                    incoming_operation = get_data(conn)
                 except InvalidOperationFormatError:
                     operation_response = OperationResponse(
                         status=False,
                         result={"message": "Invalid operation format"},
                     )
-                    send_data(operation_response)
+                    send_data(conn, operation_response)
                     continue
 
                 # Handle operation
                 operation_response = handle_operation(incoming_operation)
 
-                send_data(operation_response)
+                send_data(conn, operation_response)
     except ClientDisconnectedError:
         print(f"Client {addr} disconnected")
+
+
+def handle_notification(
+    conn: socket.socket,
+    addr,
+    query_dict: dict,
+    notification_semaphore: Semaphore,
+    notification_thread_id: UUID,
+):
+    while True:
+        notification_semaphore.acquire()
+        print("Notification received")
+
+        my_queries_iterator = filter(
+            lambda query: query["notification_thread_id"] == notification_thread_id,
+            query_dict.values(),
+        )
+
+        for query in my_queries_iterator:
+            actual_query = query["query"]
+            query_operation = OperationFactory.deserialize(actual_query)
+            query_operation_response = handle_operation(query_operation)
+            send_data(conn, query_operation_response)
 
 
 if __name__ == "__main__":
@@ -83,12 +93,42 @@ if __name__ == "__main__":
         print("PORT must be an integer")
         sys.exit(1)
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen()
-        print(f"Listening on {HOST}:{PORT}")
+    with Manager() as manager:
+        query_dict: dict = manager.dict()
 
-        while True:
-            conn, addr = s.accept()
-            p = Process(target=handle_client, args=(conn, addr))
-            p.start()
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((HOST, PORT))
+            s.listen()
+            print(f"Listening on {HOST}:{PORT}")
+
+            while True:
+                conn, addr = s.accept()
+
+                notification_thread_id = uuid4()
+                notification_semaphore = manager.Semaphore()
+                notification_semaphore.acquire()
+
+                notification_process = Process(
+                    target=handle_notification,
+                    args=(
+                        conn,
+                        addr,
+                        query_dict,
+                        notification_semaphore,
+                        notification_thread_id,
+                    ),
+                )
+                notification_process.start()
+
+                p = Process(
+                    target=handle_client,
+                    args=(
+                        conn,
+                        addr,
+                        query_dict,
+                        notification_semaphore,
+                        notification_thread_id,
+                    ),
+                )
+                notification_semaphore.release()
+                p.start()

@@ -14,10 +14,10 @@ python3 server.py --port 1424
 python3 client.py --port 1424
 ```
 1. **✓** For each connection, the server should spawn a new thread to handle the connection.
-2. **x** Each agent has two jobs
+2. **✓** Each agent has two jobs
 1. **✓** Read text requests from client and make corresponding library calls and returns results for the client
-2. **x** When there is a notification in the system that client should be informed, write a message to the client
-- **✓** Client and server speaks in a textual protocol such as JSON. First byte of the message is the length of the message, followed by the message itself.
+2. **x** When there is a notification in the system that client should be informed, write a message to the client. After every operation, we should check if there is any interested party using query_dict shared object.
+- **✓** Client and server speaks in a textual protocol such as JSON. First byte of the message is the length of the message, followed by the mes sage itself.
 #### 2. Authentication
 - **✓** Username and password will be enough for authentication. Passwords will be stored as SHA256 hashes. Passwords will be stored in the database as hashes. Passwords will be sent to the server as plain text. Server will hash the password and compare it with the stored hash.
 #### 3. Persistent Storage
@@ -75,7 +75,7 @@ not granted room will be displayed as BUSY without any other detail.
 2. **✓** `findSchedule(eventlist, rect, start, end)`: It tries to find a schedule for a group of events. The schedule should be compatible with existing room assignments and it should not have any conflict.
 3. **✓** `reassign(event, room)`: Change existing reservation of the event to new room. If request is valid, old reservation is cancelled and new reservation is made.
 4. **✓** `query(rect, title, category, room)`: It returns (event, room, start) tuples matching the query as an iterator. Room should be in the rectangle, title and category should match (as a substring) the Event information. room is the specific Room. Either room or rect is specified.
-5. **x** `addquery(organization,**kw)`: The query method parameters are registered in the view with the organization object
-6. **x** `delquery(qid)`: Query is deleted from the view
+5. **✓** `addquery(organization,**kw)`: The query method parameters are registered in the view with the organization object
+6. **✓** `delquery(qid)`: Query is deleted from the view
 7. **x** `roomView(start, end)`: The queries in the view are executed and a room based result is generated. A dictionary with room titles as keys are returned. Each room will have the query results reported for the room are listed. Rooms without an event are skipped.
 8. **x** `dayView(start, end)`: The queries in the view are executed and a daily result is generated. A dictionary with days are returned. Each day will have the query results reported for the day are included. Days without an event are skipped.
