@@ -66,3 +66,19 @@ def is_room_available(room_id: int, start_time: datetime, end_time: datetime) ->
                 return False
 
     return True
+
+
+def is_inside_rectangle(
+    top_right_x: float,
+    top_right_y: float,
+    bottom_left_x: float,
+    bottom_left_y: float,
+    x: float,
+    y: float,
+) -> bool:
+    return (
+        x <= top_right_x
+        and y <= top_right_y
+        and x >= bottom_left_x
+        and y >= bottom_left_y
+    )

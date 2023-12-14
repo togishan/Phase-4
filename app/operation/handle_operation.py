@@ -753,8 +753,78 @@ def handle_query_organization_operation(operation: Operation) -> OperationRespon
 def handle_find_room_of_organization_for_event_operation(
     operation: Operation,
 ) -> OperationResponse:
-    # TODO : Implement
-    return OperationResponse(status=False, result={"message": "Not implemented"})
+    from ..models import (
+        Room,
+        Event,
+    )
+
+    from datetime import datetime, timedelta
+
+    from .utils import is_inside_rectangle, is_room_available
+
+    try:
+        # find all the rooms in the area with enough capacity to host an event,
+        # then check for the available hours for the room
+        #
+        # checking for available hour: begin iteration from start_date opening_time for the room and
+        # iterate until end_date closing hour, iterator will be advanced by expected_duration_minute on each iteration
+        #
+        # returns the list of tuples (event, Room, startTime)
+
+        expected_duration_minute = 30
+
+        event = Event.get(Event.id == operation.args["event_id"])
+
+        available_reservations = []
+        # rooms in the rectangle with enough capacity to host the event
+        available_rooms = Room.select().where(
+            Room.capacity
+            >= event.capacity
+            & is_inside_rectangle(
+                operation.args["top_right_x"],
+                operation.args["top_right_y"],
+                operation.args["bottom_left_x"],
+                operation.args["bottom_left_y"],
+                Room.x,
+                Room.y,
+            )
+        )
+
+        # foreach room
+        for room in available_rooms:
+            date = datetime.fromisoformat(operation.args["start_time"])
+            room_open_time_hour = int(room.open_time[:2])
+            room_open_time_minute = int(room.open_time[3:])
+
+            room_close_time_hour = int(room.close_time[:2])
+            room_close_time_minute = int(room.close_time[3:])
+            # within specified date range
+            while date <= datetime.fromisoformat(operation.args["end_time"]):
+                closetime = date + timedelta(
+                    hours=room_close_time_hour, minutes=room_close_time_minute
+                )
+                time = date + timedelta(
+                    hours=room_open_time_hour, minutes=room_open_time_minute
+                )
+                # for each day between opening and closing hours
+                while time <= closetime:
+                    if time + timedelta(
+                        minutes=event.duration
+                    ) < closetime and is_room_available(
+                        room.id, time, time + timedelta(minutes=event.duration)
+                    ):
+                        available_reservations += [(event, room, time)]
+                    time += timedelta(minutes=expected_duration_minute)
+                # next day
+                date += timedelta(days=1)
+        return OperationResponse(
+            status=True,
+            result={
+                "available_reservations": available_reservations,
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
 
 
 def handle_find_room_schedule_of_organization_for_events_operation(
