@@ -9,6 +9,7 @@ class OperationType(str, Enum):
 
     CREATE_ORGANIZATION = "create_organization"
     CHANGE_USER_PERMISSON_FOR_ORGANIZATION = "change_user_permission_for_organization"
+    QUERY_ORGANIZATION = "query_organization"
 
     CREATE_ROOM = "create_room"
     CHANGE_USER_PERMISSON_FOR_ROOM = "change_user_permission_for_room"
@@ -17,11 +18,21 @@ class OperationType(str, Enum):
     DELETE_ROOM_FROM_ORGANIZATION = "delete_room_from_organization"
     DELETE_RESERVATION_OF_ROOM = "delete_reservation_of_room"
     ACCESS_ROOM = "access_room"
+    FIND_ROOM_OF_ORGANIZATION_FOR_EVENT = "find_room_of_organization_for_event"
+    FIND_ROOM_SCHEDULE_OF_ORGANIZATION_FOR_EVENTS = (
+        "find_schedule_of_room_of_organization"
+    )
 
     CREATE_EVENT = "create_event"
     CHANGE_USER_PERMISSON_FOR_EVENT = "change_user_permission_for_event"
     RESERVE_ROOM_FOR_EVENT = "reserve_room_for_event"
+    RERESERVE_ROOM_FOR_EVENT = "rereserve_room_for_event"
     LIST_EVENTS_OF_ROOM = "list_events_of_room"
+
+    ADD_QUERY = "add_query"
+    DEL_QUERY = "del_query"
+    ROOM_VIEW = "room_view"
+    DAY_VIEW = "day_view"
 
 
 class InvalidOperationFormatError(Exception):

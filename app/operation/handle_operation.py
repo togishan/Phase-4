@@ -16,6 +16,8 @@ def handle_operation(
         return handle_create_organization_operation(operation)
     elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_ORGANIZATION:
         return handle_change_user_permission_for_organization_operation(operation)
+    elif operation.type == OperationType.QUERY_ORGANIZATION:
+        return handle_query_organization_operation(operation)
     elif operation.type == OperationType.CREATE_ROOM:
         return handle_create_room_operation(operation)
     elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_ROOM:
@@ -30,14 +32,28 @@ def handle_operation(
         return handle_delete_reservation_of_room_operation(operation)
     elif operation.type == OperationType.ACCESS_ROOM:
         return handle_access_room_operation(operation)
+    elif operation.type == OperationType.FIND_ROOM_OF_ORGANIZATION_FOR_EVENT:
+        return handle_find_room_of_organization_for_event_operation(operation)
+    elif operation.type == OperationType.FIND_ROOM_SCHEDULE_OF_ORGANIZATION_FOR_EVENTS:
+        return handle_find_room_schedule_of_organization_for_events_operation(operation)
     elif operation.type == OperationType.CREATE_EVENT:
         return handle_create_event_operation(operation)
     elif operation.type == OperationType.CHANGE_USER_PERMISSON_FOR_EVENT:
         return handle_change_user_permission_for_event_operation(operation)
     elif operation.type == OperationType.RESERVE_ROOM_FOR_EVENT:
         return handle_reserve_room_for_event_operation(operation)
+    elif operation.type == OperationType.RERESERVE_ROOM_FOR_EVENT:
+        return handle_rereserve_room_for_event_operation(operation)
     elif operation.type == OperationType.LIST_EVENTS_OF_ROOM:
         return handle_list_events_of_room_operation(operation)
+    elif operation.type == OperationType.ADD_QUERY:
+        return handle_add_query_operation(operation)
+    elif operation.type == OperationType.DEL_QUERY:
+        return handle_del_query_operation(operation)
+    elif operation.type == OperationType.ROOM_VIEW:
+        return handle_room_view_operation(operation)
+    elif operation.type == OperationType.DAY_VIEW:
+        return handle_day_view_operation(operation)
 
 
 def handle_register_operation(operation: Operation) -> OperationResponse:
@@ -718,3 +734,49 @@ def handle_access_room_operation(operation: Operation) -> OperationResponse:
         )
     except Exception as e:
         return OperationResponse(status=False, result={"message": str(e)})
+
+
+def handle_query_organization_operation(operation: Operation) -> OperationResponse:
+    # TODO : Implement
+    return OperationResponse(status=False, result={"message": "Not implemented"})
+
+
+def handle_find_room_of_organization_for_event_operation(
+    operation: Operation,
+) -> OperationResponse:
+    # TODO : Implement
+    return OperationResponse(status=False, result={"message": "Not implemented"})
+
+
+def handle_find_room_schedule_of_organization_for_events_operation(
+    operation: Operation,
+) -> OperationResponse:
+    # TODO : Implement
+    return OperationResponse(status=False, result={"message": "Not implemented"})
+
+
+def handle_rereserve_room_for_event_operation(
+    operation: Operation,
+) -> OperationResponse:
+    # TODO : Implement
+    return OperationResponse(status=False, result={"message": "Not implemented"})
+
+
+def handle_add_query_operation(operation: Operation) -> OperationResponse:
+    # TODO : Implement
+    return OperationResponse(status=False, result={"message": "Not implemented"})
+
+
+def handle_del_query_operation(operation: Operation) -> OperationResponse:
+    # TODO : Implement
+    return OperationResponse(status=False, result={"message": "Not implemented"})
+
+
+def handle_room_view_operation(operation: Operation) -> OperationResponse:
+    # TODO : Implement
+    return OperationResponse(status=False, result={"message": "Not implemented"})
+
+
+def handle_day_view_operation(operation: Operation) -> OperationResponse:
+    # TODO : Implement
+    return OperationResponse(status=False, result={"message": "Not implemented"})
