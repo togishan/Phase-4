@@ -7,7 +7,7 @@ from ..library.HourMinute import HourMinute
 from ..dependency_manager import DependencyManager
 from datetime import datetime
 from ..library.Rectangle import Rectangle
-
+from .test_findroom import TestFindRoom
 
 # test reserve method to check it reserves event properly and
 # on encountering with conflict discarding and returning False
@@ -430,8 +430,15 @@ def main():
     # test1()
     # test2()
     # test3()
-    test4()
+    #test4()
 
+
+    a = TestFindRoom()
+    a.setup_method()
+    a.test_find_room_initial()
+    a.teardown_method()
+
+    ...
 
 if __name__ == "__main__":
     main()

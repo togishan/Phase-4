@@ -3,8 +3,8 @@ from uuid import uuid4
 from .HourMinute import HourMinute
 from ..auth.UserGroup import UserGroup
 from ..auth.User import User
-from .Event import Event
-from .Organization import Organization
+
+
 from enum import Enum
 from ..dependency_manager import DependencyManager
 
@@ -63,7 +63,8 @@ class Room:
     def has_permission(self, user: User, permission: RoomPermission) -> bool:
         return permission in self.permissions.get(user, set())
 
-    def list_events(self, user: User) -> list[Event]:
+    def list_events(self, user: User):
+        from .Organization import Organization
         if self.has_permission(user, RoomPermission.WRITE) or user == self.owner:
             organization: Organization = DependencyManager.get(Organization)
 
