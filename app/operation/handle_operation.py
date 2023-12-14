@@ -749,56 +749,59 @@ def handle_query_organization_operation(operation: Operation) -> OperationRespon
     from .utils import is_inside_rectangle
     from ..models import Room
 
-    top_right_x = operation.args["top_right_x"]
-    top_right_y = operation.args["top_right_y"]
-    bottom_left_x = operation.args["bottom_left_x"]
-    bottom_left_y = operation.args["bottom_left_y"]
+    try:
+        top_right_x = operation.args["top_right_x"]
+        top_right_y = operation.args["top_right_y"]
+        bottom_left_x = operation.args["bottom_left_x"]
+        bottom_left_y = operation.args["bottom_left_y"]
 
-    room_id = operation.args["room_id"]
-    title = operation.args["title"]
-    category = operation.args["category"]
+        room_id = operation.args["room_id"]
+        title = operation.args["title"]
+        category = operation.args["category"]
 
-    room = Room.get(Room.id == room_id)
-    events_of_room = room.events
+        room = Room.get(Room.id == room_id)
+        events_of_room = room.events
 
-    #  def query(self, rect: Rectangle, title: str, category: str, room: Room = None):
-    return_list = []
-    # do everything with room
-    if room_id:
-        for assignment in events_of_room:
-            if (
-                assignment.title == title
-                and assignment.category == category
-                and assignment.location_id == room_id
-            ):
-                return_list += [
-                    (assignment, assignment.location, assignment.start_time)
-                ]
+        #  def query(self, rect: Rectangle, title: str, category: str, room: Room = None):
+        return_list = []
+        # do everything with room
+        if room_id:
+            for assignment in events_of_room:
+                if (
+                    assignment.title == title
+                    and assignment.category == category
+                    and assignment.location_id == room_id
+                ):
+                    return_list += [
+                        (assignment, assignment.location, assignment.start_time)
+                    ]
 
-    # do everything with rect
-    else:
-        for assignment in events_of_room:
-            if (
-                assignment.title == title
-                and assignment.category.value == category
-                and is_inside_rectangle(
-                    top_right_x=top_right_x,
-                    top_right_y=top_right_y,
-                    bottom_left_x=bottom_left_x,
-                    bottom_left_y=bottom_left_y,
-                    x=assignment.location.x,
-                    y=assignment.location.y,
-                )
-            ):
-                return_list += [
-                    (assignment, assignment.location, assignment.start_time)
-                ]
-    return OperationResponse(
-        status=True,
-        result={
-            "assignments": return_list,
-        },
-    )
+        # do everything with rect
+        else:
+            for assignment in events_of_room:
+                if (
+                    assignment.title == title
+                    and assignment.category.value == category
+                    and is_inside_rectangle(
+                        top_right_x=top_right_x,
+                        top_right_y=top_right_y,
+                        bottom_left_x=bottom_left_x,
+                        bottom_left_y=bottom_left_y,
+                        x=assignment.location.x,
+                        y=assignment.location.y,
+                    )
+                ):
+                    return_list += [
+                        (assignment, assignment.location, assignment.start_time)
+                    ]
+        return OperationResponse(
+            status=True,
+            result={
+                "assignments": return_list,
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
 
 
 def handle_find_room_of_organization_for_event_operation(
