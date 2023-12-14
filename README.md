@@ -54,7 +54,7 @@ room.
 - **✓ RESERVE:**: user can reserve the room.
 - **✓ PERRESERVE:**: user can reserve the room for periodic events. Implies RESERVE.
 - **✓ DELETE**: user can delete the reservations for the room.
-- **x LIST**: user can list and view the Event reservations for the room. It requires WRITE permission on the Event. Owner of the Room can delete any events WRITE permission on event.
+
 
 
 #### 7. Event have their own permissions
@@ -65,5 +65,7 @@ not granted room will be displayed as BUSY without any other detail.
     "WRITE": ["user1"], // User can update and delete (if Room has DELETE too) the Event
 }
 ```
+-  **✓ READ**: User can see the title and details of the events. If not granted room will be displayed as BUSY without any other detail.
+-  **✓ WRITE**: User can update and delete (if Room has DELETE too) the Event.
 #### 8. View
 - **x** roomView and dayView commands result on a list of tables, a table per matching Room and a table per matching Day respectively.
