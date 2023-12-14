@@ -71,7 +71,7 @@ not granted room will be displayed as BUSY without any other detail.
 - **x** roomView and dayView commands result on a list of tables, a table per matching Room and a table per matching Day respectively.
 
 #### 8. Additional Operations
-1. **x** `findRoom(event, rect, start, end)`: Find and return Room objecst within the rectangle and available in the interval defined by start and end. Room capacities should match the Event. It returns an iterator.
+1. **✓** `findRoom(event, rect, start, end)`: Find and return Room objecst within the rectangle and available in the interval defined by start and end. Room capacities should match the Event. It returns an iterator.
 2. **x** `findSchedule(eventlist, rect, start, end)`: It tries to find a schedule for a group of events. The schedule should be compatible with existing room assignments and it should not have any conflict.
 3. **x** `reassign(event, room)`: Change existing reservation of the event to new room. If request is valid, old reservation is cancelled and new reservation is made.
 4. **x** `query(rect, title, category, room)`: It returns (event, room, start) tuples matching the query as an iterator. Room should be in the rectangle, title and category should match (as a substring) the Event information. room is the specific Room. Either room or rect is specified.
