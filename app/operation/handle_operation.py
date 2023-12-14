@@ -572,7 +572,7 @@ def handle_list_events_of_room_operation(operation: Operation) -> OperationRespo
                     result={"message": "User does not have permission to list events"},
                 )
 
-        events = Event.select().where(Event.location == room).execute()
+        events = Event.select().where(Event.location == room)
 
         return OperationResponse(
             status=True,
@@ -592,7 +592,8 @@ def handle_reserve_room_for_event_operation(operation: Operation) -> OperationRe
         UserPermissionForRoom,
     )
     from ..dependency_manager import DependencyManager
-    from datetime import datetime
+    from datetime import datetime, timedelta
+    from .utils import is_room_available
 
     try:
         user: User = DependencyManager.get(User)
@@ -623,8 +624,16 @@ def handle_reserve_room_for_event_operation(operation: Operation) -> OperationRe
                     },
                 )
 
-        # TODO : Check if room is available
-        # TODO : For weekly events, check if room is available for all events
+        if not is_room_available(
+            room.id,
+            datetime.fromisoformat(operation.args["start_time"]),
+            datetime.fromisoformat(operation.args["start_time"])
+            + timedelta(minutes=event.duration),
+        ):
+            return OperationResponse(
+                status=False,
+                result={"message": "Room is not available for this event"},
+            )
 
         event.location = room
         event.start_time = datetime.fromisoformat(operation.args["start_time"])
