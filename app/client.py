@@ -1,15 +1,12 @@
 import socket
 import sys
 from .operation.operation import Operation, OperationType
-from .operation.operation_response import OperationResponse, OperationResponseFactory
 from datetime import datetime
+
+from .client_utils import send_data, get_data, ServerDisconnectedError
 
 HOST = "0.0.0.0"
 PORT = 65432
-
-
-class ServerDisconnectedError(Exception):
-    pass
 
 
 if __name__ == "__main__":
@@ -33,30 +30,6 @@ if __name__ == "__main__":
 
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-
-            def send_data(operation: Operation):
-                print(f"Sending {operation}")
-                response_bytes = operation.serialize()
-
-                response_len = len(response_bytes)
-                response_len_bytes = response_len.to_bytes(4, "big")
-
-                s.sendall(response_len_bytes)
-                s.sendall(response_bytes)
-
-            def get_data() -> OperationResponse:
-                data_len_bytes = s.recv(4)
-                if not data_len_bytes:
-                    raise ServerDisconnectedError()
-                data_len = int.from_bytes(data_len_bytes, "big")
-
-                operation_response_bytes = s.recv(data_len)
-                operation_response = OperationResponseFactory.deserialize(
-                    operation_response_bytes
-                )
-                print(f"Received {operation_response}")
-                return operation_response
-
             s.connect((HOST, PORT))
 
             username1 = "test1"
@@ -72,40 +45,40 @@ if __name__ == "__main__":
             username2 = "test2"
             password2 = "test2"
             name2 = "test_name2"
-            send_data(register_operation1)
-            register_operation1_response = get_data()
+            send_data(s, register_operation1)
+            register_operation1_response = get_data(s)
 
             # Register user2
             register_operation2 = Operation(
                 type=OperationType.REGISTER,
                 args={"username": username2, "password": password2, "name": name2},
             )
-            send_data(register_operation2)
-            register_operation2_response = get_data()
+            send_data(s, register_operation2)
+            register_operation2_response = get_data(s)
 
             # Login
             login_operation = Operation(
                 type=OperationType.LOGIN,
                 args={"username": username1, "password": password1},
             )
-            send_data(login_operation)
-            login_operation_response = get_data()
+            send_data(s, login_operation)
+            login_operation_response = get_data(s)
 
             # # Logout
             # logout_operation = Operation(
             #     type=OperationType.LOGOUT,
             #     args={},
             # )
-            # send_data(logout_operation)
-            # logout_operation_response = get_data()
+            # send_data(s, logout_operation)
+            # logout_operation_response = get_data(s)
 
             # Create organization
             create_organization_operation = Operation(
                 type=OperationType.CREATE_ORGANIZATION,
                 args={"name": "test_organization"},
             )
-            send_data(create_organization_operation)
-            create_organization_operation_response = get_data()
+            send_data(s, create_organization_operation)
+            create_organization_operation_response = get_data(s)
 
             # Change permissions of organization
             user_id = 2
@@ -122,8 +95,8 @@ if __name__ == "__main__":
                     "permissions": permissions,
                 },
             )
-            send_data(change_permissions_of_organization_operation)
-            change_permissions_of_organization_operation_response = get_data()
+            send_data(s, change_permissions_of_organization_operation)
+            change_permissions_of_organization_operation_response = get_data(s)
 
             # Change permissions of organization again
             user_id = 2
@@ -140,8 +113,8 @@ if __name__ == "__main__":
                     "permissions": permissions,
                 },
             )
-            send_data(change_permissions_of_organization_operation)
-            change_permissions_of_organization_operation_response = get_data()
+            send_data(s, change_permissions_of_organization_operation)
+            change_permissions_of_organization_operation_response = get_data(s)
 
             # Create room
             create_room_operation = Operation(
@@ -155,16 +128,16 @@ if __name__ == "__main__":
                     "close_time": "20:00",
                 },
             )
-            send_data(create_room_operation)
-            create_room_operation_response = get_data()
+            send_data(s, create_room_operation)
+            create_room_operation_response = get_data(s)
 
             # Login
             login_operation = Operation(
                 type=OperationType.LOGIN,
                 args={"username": username2, "password": password2},
             )
-            send_data(login_operation)
-            login_operation_response = get_data()
+            send_data(s, login_operation)
+            login_operation_response = get_data(s)
 
             # Add room to organization
             organization_id = create_organization_operation_response.result[
@@ -179,8 +152,8 @@ if __name__ == "__main__":
                     "room_id": room_id,
                 },
             )
-            send_data(add_room_to_organization_operation)
-            add_room_to_organization_operation_response = get_data()
+            send_data(s, add_room_to_organization_operation)
+            add_room_to_organization_operation_response = get_data(s)
 
             # Change permissions of room
             user_id = 2
@@ -195,8 +168,8 @@ if __name__ == "__main__":
                     "permissions": permissions,
                 },
             )
-            send_data(change_user_permission_for_room_operation)
-            change_user_permission_for_room_operation_response = get_data()
+            send_data(s, change_user_permission_for_room_operation)
+            change_user_permission_for_room_operation_response = get_data(s)
 
             # Create event
             create_event_operation = Operation(
@@ -210,8 +183,8 @@ if __name__ == "__main__":
                     "weekly": None,
                 },
             )
-            send_data(create_event_operation)
-            create_event_operation_response = get_data()
+            send_data(s, create_event_operation)
+            create_event_operation_response = get_data(s)
 
             # Change permissions of event
             user_id = 2
@@ -226,16 +199,16 @@ if __name__ == "__main__":
                     "permissions": permissions,
                 },
             )
-            send_data(change_user_permission_for_event_operation)
-            change_user_permission_for_event_operation_response = get_data()
+            send_data(s, change_user_permission_for_event_operation)
+            change_user_permission_for_event_operation_response = get_data(s)
 
             # Login
             login_operation = Operation(
                 type=OperationType.LOGIN,
                 args={"username": username1, "password": password1},
             )
-            send_data(login_operation)
-            login_operation_response = get_data()
+            send_data(s, login_operation)
+            login_operation_response = get_data(s)
 
             # List rooms of organization
             organization_id = create_organization_operation_response.result[
@@ -248,8 +221,8 @@ if __name__ == "__main__":
                     "organization_id": organization_id,
                 },
             )
-            send_data(list_rooms_of_organization_operation)
-            list_rooms_of_organization_operation_response = get_data()
+            send_data(s, list_rooms_of_organization_operation)
+            list_rooms_of_organization_operation_response = get_data(s)
 
             # # Delete room
             # room_id = create_room_operation_response.result["room"]["id"]
@@ -264,8 +237,8 @@ if __name__ == "__main__":
             #         "organization_id": organization_id,
             #     },
             # )
-            # send_data(delete_room_operation)
-            # delete_room_operation_response = get_data()
+            # send_data(s, delete_room_operation)
+            # delete_room_operation_response = get_data(s)
 
             # Reserve room for event
             event_id = create_event_operation_response.result["event"]["id"]
@@ -280,8 +253,8 @@ if __name__ == "__main__":
                     "start_time": start_time,
                 },
             )
-            send_data(reserve_room_for_event_operation)
-            reserve_room_for_event_operation_response = get_data()
+            send_data(s, reserve_room_for_event_operation)
+            reserve_room_for_event_operation_response = get_data(s)
 
             # List events of room
             room_id = create_room_operation_response.result["room"]["id"]
@@ -292,8 +265,8 @@ if __name__ == "__main__":
                     "room_id": room_id,
                 },
             )
-            send_data(list_events_of_room_operation)
-            list_events_of_room_operation_response = get_data()
+            send_data(s, list_events_of_room_operation)
+            list_events_of_room_operation_response = get_data(s)
 
             # Delete reservation of room
             event_id = create_event_operation_response.result["event"]["id"]
@@ -304,8 +277,8 @@ if __name__ == "__main__":
                     "event_id": event_id,
                 },
             )
-            send_data(delete_reservation_of_room_operation)
-            delete_reservation_of_room_operation_response = get_data()
+            send_data(s, delete_reservation_of_room_operation)
+            delete_reservation_of_room_operation_response = get_data(s)
 
             # List events of room
             room_id = create_room_operation_response.result["room"]["id"]
@@ -316,8 +289,8 @@ if __name__ == "__main__":
                     "room_id": room_id,
                 },
             )
-            send_data(list_events_of_room_operation)
-            list_events_of_room_operation_response = get_data()
+            send_data(s, list_events_of_room_operation)
+            list_events_of_room_operation_response = get_data(s)
 
             # # Reserve room for event
             # event_id = create_event_operation_response.result["event"]["id"]
@@ -332,8 +305,8 @@ if __name__ == "__main__":
             #         "start_time": start_time,
             #     },
             # )
-            # send_data(reserve_room_for_event_operation)
-            # reserve_room_for_event_operation_response = get_data()
+            # send_data(s, reserve_room_for_event_operation)
+            # reserve_room_for_event_operation_response = get_data(s)
 
             # Access room
             room_id = create_room_operation_response.result["room"]["id"]
@@ -344,8 +317,8 @@ if __name__ == "__main__":
                     "room_id": room_id,
                 },
             )
-            send_data(access_room_operation)
-            access_room_operation_response = get_data()
+            send_data(s, access_room_operation)
+            access_room_operation_response = get_data(s)
 
     except ServerDisconnectedError:
         print("Server disconnected")
