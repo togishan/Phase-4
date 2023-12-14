@@ -884,8 +884,101 @@ def handle_find_room_of_organization_for_event_operation(
 def handle_find_room_schedule_of_organization_for_events_operation(
     operation: Operation,
 ) -> OperationResponse:
-    # TODO : Implement
-    return OperationResponse(status=False, result={"message": "Not implemented"})
+    from ..models import (
+        Event,
+    )
+
+    from datetime import datetime, timedelta
+    from .utils import are_two_times_conflicting
+
+    try:
+        event_ids = operation.args["event_ids"]
+        event_list = (
+            Event.select()
+            .where(Event.id.in_(event_ids))
+            .order_by(Event.duration.desc())
+        )
+
+        # consists of tuples (event, room, start)
+        result_list = []
+        # consists of lists which consist of tuples (event, room, start)
+        available_assignments_for_events = []
+        # sort events descending by the duration
+
+        # foreach event find all assignable hour, room pairs
+        # if no assignable hour is found for the event then, the schedule can not be built so return []
+        # else add tuple list coming from the function find_room to the available_assignments_for_events list
+        for event in event_list:
+            find_room_operation = Operation(
+                type=OperationType.FIND_ROOM_OF_ORGANIZATION_FOR_EVENT,
+                args={
+                    "event_id": event.id,
+                    "top_right_x": operation.args["top_right_x"],
+                    "top_right_y": operation.args["top_right_y"],
+                    "bottom_left_x": operation.args["bottom_left_x"],
+                    "bottom_left_y": operation.args["bottom_left_y"],
+                    "start_time": operation.args["start_time"],
+                    "end_time": operation.args["end_time"],
+                },
+            )
+            find_room_operation_response = (
+                handle_find_room_of_organization_for_event_operation(
+                    find_room_operation
+                ),
+            )
+
+            available_reservations = find_room_operation_response.result[
+                "available_reservations"
+            ]
+
+            if available_reservations.length == 0:
+                return OperationResponse(
+                    status=None,
+                    result={
+                        "message": "No schedule can be built for the given events",
+                    },
+                )
+
+            available_assignments_for_events += [available_reservations]
+
+        for assignments in available_assignments_for_events:
+            assignment_scheduled = False
+            for assignment in assignments:
+                # check if the assignment conflicts with previously added ones to the result_list
+                conflicts = False
+                for i in result_list:
+                    i_room_id = i[1].id
+                    assignment_room_id = assignment[1].id
+
+                    if i_room_id == assignment_room_id and are_two_times_conflicting(
+                        datetime.fromisoformat(i[2]),
+                        datetime.fromisoformat(i[2]) + timedelta(minutes=i[0].duration),
+                        datetime.fromisoformat(assignment[2]),
+                        datetime.fromisoformat(assignment[2])
+                        + timedelta(minutes=assignment[0].duration),
+                    ):
+                        conflicts = True
+                        break
+                if not conflicts:
+                    result_list += [assignment]
+                    assignment_scheduled = True
+                    break
+            if not assignment_scheduled:
+                return OperationResponse(
+                    status=None,
+                    result={
+                        "message": "No schedule can be built for the given events",
+                    },
+                )
+
+        return OperationResponse(
+            status=True,
+            result={
+                "schedule": result_list,
+            },
+        )
+    except Exception as e:
+        return OperationResponse(status=False, result={"message": str(e)})
 
 
 def handle_rereserve_room_for_event_operation(
