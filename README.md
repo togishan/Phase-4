@@ -74,7 +74,7 @@ not granted room will be displayed as BUSY without any other detail.
 1. **✓** `findRoom(event, rect, start, end)`: Find and return Room objecst within the rectangle and available in the interval defined by start and end. Room capacities should match the Event. It returns an iterator.
 2. **x** `findSchedule(eventlist, rect, start, end)`: It tries to find a schedule for a group of events. The schedule should be compatible with existing room assignments and it should not have any conflict.
 3. **x** `reassign(event, room)`: Change existing reservation of the event to new room. If request is valid, old reservation is cancelled and new reservation is made.
-4. **x** `query(rect, title, category, room)`: It returns (event, room, start) tuples matching the query as an iterator. Room should be in the rectangle, title and category should match (as a substring) the Event information. room is the specific Room. Either room or rect is specified.
+4. **✓** `query(rect, title, category, room)`: It returns (event, room, start) tuples matching the query as an iterator. Room should be in the rectangle, title and category should match (as a substring) the Event information. room is the specific Room. Either room or rect is specified.
 5. **x** `addquery(organization,**kw)`: The query method parameters are registered in the view with the organization object
 6. **x** `delquery(qid)`: Query is deleted from the view
 7. **x** `roomView(start, end)`: The queries in the view are executed and a room based result is generated. A dictionary with room titles as keys are returned. Each room will have the query results reported for the room are listed. Rooms without an event are skipped.
