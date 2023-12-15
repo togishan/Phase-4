@@ -714,7 +714,7 @@ def handle_delete_reservation_of_room_operation(
 
 
 def handle_access_room_operation(operation: Operation) -> OperationResponse:
-    from ..models import Room, User, UserPermissionForRoom, Event
+    from ..models import Room, User, Organization, UserPermissionForOrganization, Event
     from ..dependency_manager import DependencyManager
 
     try:
@@ -722,13 +722,16 @@ def handle_access_room_operation(operation: Operation) -> OperationResponse:
 
         room: Room = Room.get(Room.id == operation.args["room_id"])
 
+        organization: Organization = Organization.get(
+            Organization.id == operation.args["organization_id"]
+        )
         if room.owner != user:
             try:
-                user_permission_for_room: UserPermissionForRoom = (
-                    UserPermissionForRoom.get(
-                        (UserPermissionForRoom.user_id == user.id)
-                        & (UserPermissionForRoom.room == room)
-                        & (UserPermissionForRoom.permission == "ACCESS")
+                user_permission_for_room: UserPermissionForOrganization = (
+                    UserPermissionForOrganization.get(
+                        (UserPermissionForOrganization.user_id == user.id)
+                        &(UserPermissionForOrganization.organization == organization)
+                        & (UserPermissionForOrganization.permission == "ACCESS")
                     )
                 )
             except Exception as e:
