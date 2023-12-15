@@ -54,7 +54,7 @@ class TestOrganizationAddListAccess:
             "organization"
         ]["id"]
         
-        # Create 2 rooms, operations them will be tested when user has a permission and 
+        # Create 2 rooms, operations on them will be tested when user has a permission and 
         # no permission
         self.room1_name = get_random_string(10)
         create_room_operation = Operation(
