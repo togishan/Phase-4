@@ -19,21 +19,27 @@ def is_room_available(room_id: int, start_time: datetime, end_time: datetime) ->
     room = Room.get(Room.id == room_id)
     events_in_room = Event.select().where(Event.location_id == room_id)
 
+    room_open_time_hour = int(room.open_time[:2])
+    room_open_time_minute = int(room.open_time[3:])
+
+    room_close_time_hour = int(room.close_time[:2])
+    room_close_time_minute = int(room.close_time[3:])
+
     # Is room open?
     if not (
         (
             (
-                start_time.hour == room.open_time.hour
-                and start_time.minute >= room.open_time.minute
+                start_time.hour == room_open_time_hour
+                and start_time.minute >= room_open_time_minute
             )
-            or (start_time.hour > room.open_time.hour)
+            or (start_time.hour > room_open_time_hour)
         )
         and (
             (
-                end_time.hour == room.close_time.hour
-                and end_time.minute <= room.close_time.minute
+                end_time.hour == room_close_time_hour
+                and end_time.minute <= room_close_time_minute
             )
-            or (end_time.hour < room.close_time.hour)
+            or (end_time.hour < room_close_time_hour)
         )
     ):
         return False

@@ -467,13 +467,18 @@ def handle_list_rooms_of_organization_operation(
                     result={"message": "User does not have permission to list rooms"},
                 )
 
-        RoomInOrganization.select().where(
+        room_in_organizations = RoomInOrganization.select().where(
             RoomInOrganization.organization == organization
-        ).execute()
+        )
 
         return OperationResponse(
             status=True,
-            result={},
+            result={
+                "rooms": [
+                    room_in_organization.room.to_dict()
+                    for room_in_organization in room_in_organizations
+                ]
+            },
         )
     except Exception as e:
         return OperationResponse(status=False, result={"message": str(e)})
