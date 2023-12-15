@@ -540,16 +540,16 @@ def handle_delete_room_from_organization_operation(
         #    == organization & RoomInOrganization.room
         #    == operation.args["room_id"] 
         #)
-        room_in_organization = list(RoomInOrganization.select().execute())
+        #room_in_organization = list(RoomInOrganization.select().execute())
 
-        print("\n\n\n")
-        for i in room_in_organization:
-            print(i.to_dict())
+        #print("\n\n\n")
+        #for i in room_in_organization:
+        #    print(i.to_dict())
 
         RoomInOrganization.delete().where(
-            RoomInOrganization.organization
-            == organization & RoomInOrganization.room
-            == operation.args["room_id"],
+            (RoomInOrganization.organization
+            == organization) & (RoomInOrganization.room
+            == operation.args["room_id"]),
         ).execute()
 
         return OperationResponse(
