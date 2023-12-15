@@ -494,6 +494,7 @@ def handle_delete_room_from_organization_operation(
         UserPermissionForOrganization,
         UserPermissionForRoom,
         Event,
+        Room
     )
     from ..dependency_manager import DependencyManager
 
@@ -533,6 +534,17 @@ def handle_delete_room_from_organization_operation(
                 )
 
         Event.delete().where(Event.location == operation.args["room_id"]).execute()
+
+        #room_in_organization: RoomInOrganization = RoomInOrganization.get(
+        #    RoomInOrganization.organization
+        #    == organization & RoomInOrganization.room
+        #    == operation.args["room_id"] 
+        #)
+        room_in_organization = list(RoomInOrganization.select().execute())
+
+        print("\n\n\n")
+        for i in room_in_organization:
+            print(i.to_dict())
 
         RoomInOrganization.delete().where(
             RoomInOrganization.organization
