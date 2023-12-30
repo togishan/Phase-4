@@ -3,7 +3,13 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from .models import Organization, Room, Event, UserPermissionForOrganization
+from .models import (
+    Organization,
+    Room,
+    Event,
+    UserPermissionForOrganization,
+    UserPermissionForRoom,
+)
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, get_object_or_404
 from .forms import (
@@ -11,6 +17,7 @@ from .forms import (
     RoomForm,
     EventForm,
     UserPermissionForOrganizationForm,
+    UserPermissionForRoomForm,
 )
 
 
@@ -192,3 +199,47 @@ def delete_user_permission_for_organization(request, permission_id):
     permission = get_object_or_404(UserPermissionForOrganization, id=permission_id)
     permission.delete()
     return redirect("user_permission_for_organization_list")
+
+
+# Assume you already have views for other models
+# ...
+
+
+def user_permission_for_room_list(request):
+    permissions = UserPermissionForRoom.objects.all()
+    return render(
+        request, "user_permission_for_room_list.html", {"permissions": permissions}
+    )
+
+
+def create_user_permission_for_room(request):
+    if request.method == "POST":
+        form = UserPermissionForRoomForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("user_permission_for_room_list")
+    else:
+        form = UserPermissionForRoomForm()
+    return render(request, "create_user_permission_for_room.html", {"form": form})
+
+
+def update_user_permission_for_room(request, permission_id):
+    permission = get_object_or_404(UserPermissionForRoom, id=permission_id)
+    if request.method == "POST":
+        form = UserPermissionForRoomForm(request.POST, instance=permission)
+        if form.is_valid():
+            form.save()
+            return redirect("user_permission_for_room_list")
+    else:
+        form = UserPermissionForRoomForm(instance=permission)
+    return render(
+        request,
+        "update_user_permission_for_room.html",
+        {"form": form, "permission": permission},
+    )
+
+
+def delete_user_permission_for_room(request, permission_id):
+    permission = get_object_or_404(UserPermissionForRoom, id=permission_id)
+    permission.delete()
+    return redirect("user_permission_for_room_list")

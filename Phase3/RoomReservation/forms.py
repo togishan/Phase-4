@@ -1,6 +1,12 @@
 # forms.py
 from django import forms
-from .models import Organization, Room, Event, UserPermissionForOrganization
+from .models import (
+    Organization,
+    Room,
+    Event,
+    UserPermissionForOrganization,
+    UserPermissionForRoom,
+)
 
 
 class OrganizationForm(forms.ModelForm):
@@ -35,3 +41,9 @@ class UserPermissionForOrganizationForm(forms.ModelForm):
     class Meta:
         model = UserPermissionForOrganization
         fields = ["user", "organization", "permission"]
+
+
+class UserPermissionForRoomForm(forms.ModelForm):
+    class Meta:
+        model = UserPermissionForRoom
+        fields = ["user", "room", "permission"]

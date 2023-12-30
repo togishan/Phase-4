@@ -15,6 +15,12 @@ from .views import (
     update_user_permission_for_organization,
     delete_user_permission_for_organization,
 )
+from .views import (
+    user_permission_for_room_list,
+    create_user_permission_for_room,
+    update_user_permission_for_room,
+    delete_user_permission_for_room,
+)
 
 
 urlpatterns = [
@@ -64,4 +70,25 @@ urlpatterns = [
         name="delete_user_permission_for_organization",
     ),
     # Add similar patterns for other models as needed
+    # User Permission for Room URLs
+    path(
+        "user_permissions_for_rooms/",
+        user_permission_for_room_list,
+        name="user_permission_for_room_list",
+    ),
+    path(
+        "user_permissions_for_rooms/create/",
+        create_user_permission_for_room,
+        name="create_user_permission_for_room",
+    ),
+    path(
+        "user_permissions_for_rooms/<int:permission_id>/update/",
+        update_user_permission_for_room,
+        name="update_user_permission_for_room",
+    ),
+    path(
+        "user_permissions_for_rooms/<int:permission_id>/delete/",
+        delete_user_permission_for_room,
+        name="delete_user_permission_for_room",
+    ),
 ]

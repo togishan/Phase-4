@@ -1,0 +1,24 @@
+<!-- user_permission_for_room_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Permissions for Room List</title>
+</head>
+
+<body>
+    <h1>User Permissions for Room List</h1>
+    <ul>
+        {% for permission in permissions %}
+        <li>
+            User: {{ permission.user.username }} - Room: {{ permission.room.name }} - Permission: {{
+            permission.get_permission_display }}
+            [<a href="{% url 'delete_user_permission_for_room' permission.id %}">Delete</a>]
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_user_permission_for_room' %}">Create New User Permission for Room</a>
+</body>
+
+</html>
