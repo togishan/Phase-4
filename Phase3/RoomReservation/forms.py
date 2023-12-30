@@ -6,6 +6,7 @@ from .models import (
     Event,
     UserPermissionForOrganization,
     UserPermissionForRoom,
+    UserPermissionForEvent,
 )
 
 
@@ -56,3 +57,9 @@ class UserPermissionForRoomForm(forms.ModelForm):
     class Meta:
         model = UserPermissionForRoom
         fields = ["user", "room", "permission"]
+
+
+class UserPermissionForEventForm(forms.ModelForm):
+    class Meta:
+        model = UserPermissionForEvent
+        fields = ["user", "event", "permission"]

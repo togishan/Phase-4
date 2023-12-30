@@ -22,9 +22,18 @@ from .views import (
     delete_user_permission_for_room,
 )
 
+from .views import (
+    user_permission_for_event_list,
+    create_user_permission_for_event,
+    update_user_permission_for_event,
+    delete_user_permission_for_event,
+)
+
+from .views import RegistrationView
 
 urlpatterns = [
     path("", main_page, name="main_page"),
+    path("accounts/register/", RegistrationView.as_view(), name="registration_view"),
     # Organization URLs
     path("organizations/", organization_list, name="organization_list"),
     path("organizations/create/", create_organization, name="create_organization"),
@@ -90,5 +99,26 @@ urlpatterns = [
         "user_permissions_for_rooms/<int:permission_id>/delete/",
         delete_user_permission_for_room,
         name="delete_user_permission_for_room",
+    ),
+    # User Permission for Event URLs
+    path(
+        "user_permissions_for_events/",
+        user_permission_for_event_list,
+        name="user_permission_for_event_list",
+    ),
+    path(
+        "user_permissions_for_events/create/",
+        create_user_permission_for_event,
+        name="create_user_permission_for_event",
+    ),
+    path(
+        "user_permissions_for_events/<int:permission_id>/update/",
+        update_user_permission_for_event,
+        name="update_user_permission_for_event",
+    ),
+    path(
+        "user_permissions_for_events/<int:permission_id>/delete/",
+        delete_user_permission_for_event,
+        name="delete_user_permission_for_event",
     ),
 ]
