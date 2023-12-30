@@ -1,0 +1,23 @@
+<!-- event_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Event List</title>
+</head>
+
+<body>
+    <h1>Event List</h1>
+    <ul>
+        {% for event in events %}
+        <li>
+            {{ event.title }} - {{ event.owner.username }}
+            [<a href="{% url 'delete_event' event.id %}">Delete</a>]
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_event' %}">Create New Event</a>
+</body>
+
+</html>

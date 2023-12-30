@@ -3,10 +3,10 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from .models import Organization, Room
+from .models import Organization, Room, Event
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, get_object_or_404
-from .forms import OrganizationForm, RoomForm
+from .forms import OrganizationForm, RoomForm, EventForm
 
 
 # Create your views here.
@@ -101,3 +101,41 @@ def delete_room(request, room_id):
     room = get_object_or_404(Room, id=room_id)
     room.delete()
     return redirect("room_list")
+
+
+# Assume you already have views for the other models (Organization and Room)
+# ...
+
+
+def event_list(request):
+    events = Event.objects.all()
+    return render(request, "event_list.html", {"events": events})
+
+
+def create_event(request):
+    if request.method == "POST":
+        form = EventForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("event_list")
+    else:
+        form = EventForm()
+    return render(request, "create_event.html", {"form": form})
+
+
+def update_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    if request.method == "POST":
+        form = EventForm(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+            return redirect("event_list")
+    else:
+        form = EventForm(instance=event)
+    return render(request, "update_event.html", {"form": form, "event": event})
+
+
+def delete_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    event.delete()
+    return redirect("event_list")

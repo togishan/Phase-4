@@ -8,6 +8,7 @@ from .views import (
 )
 
 from .views import room_list, create_room, update_room, delete_room
+from .views import event_list, create_event, update_event, delete_event
 
 
 urlpatterns = [
@@ -30,4 +31,9 @@ urlpatterns = [
     path("rooms/create/", create_room, name="create_room"),
     path("rooms/<int:room_id>/update/", update_room, name="update_room"),
     path("rooms/<int:room_id>/delete/", delete_room, name="delete_room"),
+    # Event URLs
+    path("events/", event_list, name="event_list"),
+    path("events/create/", create_event, name="create_event"),
+    path("events/<int:event_id>/update/", update_event, name="update_event"),
+    path("events/<int:event_id>/delete/", delete_event, name="delete_event"),
 ]
