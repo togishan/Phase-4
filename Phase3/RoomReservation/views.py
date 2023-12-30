@@ -3,10 +3,11 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from .models import Organization
+from .models import Organization, Room
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, get_object_or_404
-from .forms import OrganizationForm
+from .forms import OrganizationForm, RoomForm
+
 
 # Create your views here.
 
@@ -66,3 +67,37 @@ def delete_organization(request, organization_id):
     organization = get_object_or_404(Organization, id=organization_id)
     organization.delete()
     return redirect("organization_list")
+
+
+def room_list(request):
+    rooms = Room.objects.all()
+    return render(request, "room_list.html", {"rooms": rooms})
+
+
+def create_room(request):
+    if request.method == "POST":
+        form = RoomForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("room_list")
+    else:
+        form = RoomForm()
+    return render(request, "create_room.html", {"form": form})
+
+
+def update_room(request, room_id):
+    room = get_object_or_404(Room, id=room_id)
+    if request.method == "POST":
+        form = RoomForm(request.POST, instance=room)
+        if form.is_valid():
+            form.save()
+            return redirect("room_list")
+    else:
+        form = RoomForm(instance=room)
+    return render(request, "update_room.html", {"form": form, "room": room})
+
+
+def delete_room(request, room_id):
+    room = get_object_or_404(Room, id=room_id)
+    room.delete()
+    return redirect("room_list")

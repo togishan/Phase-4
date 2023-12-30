@@ -11,7 +11,10 @@
     <h1>Organization List</h1>
     <ul>
         {% for organization in organizations %}
-        <li>{{ organization.name }} - {{ organization.owner.username }}</li>
+        <li>
+            {{ organization.name }} - {{ organization.owner.username }}
+            [<a href="{% url 'delete_organization' organization.id %}">Delete</a>]
+        </li>
         {% endfor %}
     </ul>
     <a href="{% url 'create_organization' %}">Create New Organization</a>

@@ -1,0 +1,23 @@
+<!-- room_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Room List</title>
+</head>
+
+<body>
+    <h1>Room List</h1>
+    <ul>
+        {% for room in rooms %}
+        <li>
+            {{ room.name }} - {{ room.owner.username }}
+            [<a href="{% url 'delete_room' room.id %}">Delete</a>]
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_room' %}">Create New Room</a>
+</body>
+
+</html>

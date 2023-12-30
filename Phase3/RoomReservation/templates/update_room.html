@@ -1,0 +1,20 @@
+<!-- update_room.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Update Room</title>
+</head>
+
+<body>
+    <h1>Update Room</h1>
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Update">
+    </form>
+    <a href="{% url 'room_list' %}">Back to Room List</a>
+</body>
+
+</html>
