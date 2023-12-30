@@ -6,19 +6,18 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-
-
-
 class Organization(models.Model):
     name = models.CharField(max_length=256)
-    owner = models.ForeignKey(User, related_name= "organizations", on_delete = models.CASCADE)
+    owner = models.ForeignKey(
+        User, related_name="organizations", on_delete=models.CASCADE
+    )
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
             "owner": self.owner.to_dict(),
-        } 	
+        }
 
 
 class UserPermissionForOrganization(models.Model):
@@ -37,10 +36,14 @@ class UserPermissionForOrganization(models.Model):
 
 class Room(models.Model):
     name = models.CharField(max_length=256)
-    owner = models.ForeignKey(User, related_name="rooms", on_delete = models.CASCADE)
+    owner = models.ForeignKey(User, related_name="rooms", on_delete=models.CASCADE)
     x = models.FloatField()
     y = models.FloatField()
     capacity = models.IntegerField()
+
+    organization = models.ForeignKey(
+        Organization, related_name="rooms", on_delete=models.CASCADE
+    )  # Added field
 
     # Format HH:MM which denotes the time the room opens in 24 hour format (e.g. 13:00)
     open_time = models.CharField(max_length=256)
@@ -74,21 +77,10 @@ class UserPermissionForRoom(models.Model):
     )
 
 
-class RoomInOrganization(models.Model):
-    room = models.ManyToManyField(Room, related_name="organizations")
-    organization = models.ManyToManyField(Organization, related_name="rooms")
-
-    def to_dict(self):
-        return {
-            "room": self.room.to_dict(),
-            "organization": self.organization.to_dict(),
-        }
-
-
 class Event(models.Model):
     title = models.CharField(max_length=256)
     description = models.CharField(max_length=256)
-    owner = models.ForeignKey(User, related_name="events", on_delete = models.CASCADE)
+    owner = models.ForeignKey(User, related_name="events", on_delete=models.CASCADE)
     category = models.CharField(
         max_length=256,
         choices=(
@@ -102,7 +94,9 @@ class Event(models.Model):
     capacity = models.IntegerField()
     duration = models.IntegerField()
     start_time = models.DateTimeField(null=True)
-    location = models.ForeignKey(Room, related_name="events", null=True, on_delete = models.SET_NULL)
+    location = models.ForeignKey(
+        Room, related_name="events", null=True, on_delete=models.SET_NULL
+    )
     weekly = models.DateTimeField(null=True)
 
     def to_dict(self):
@@ -145,5 +139,3 @@ class UserPermissionForEvent(models.Model):
             ("READ", "READ"),
         ),
     )
-
-

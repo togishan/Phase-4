@@ -81,6 +81,9 @@ def delete_organization(request, organization_id):
     return redirect("organization_list")
 
 
+# ...
+
+
 def room_list(request):
     rooms = Room.objects.all()
     return render(request, "room_list.html", {"rooms": rooms})

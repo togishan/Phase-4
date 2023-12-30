@@ -18,7 +18,16 @@ class OrganizationForm(forms.ModelForm):
 class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        fields = ["name", "owner", "x", "y", "capacity", "open_time", "close_time"]
+        fields = [
+            "name",
+            "owner",
+            "organization",
+            "x",
+            "y",
+            "capacity",
+            "open_time",
+            "close_time",
+        ]
 
 
 class EventForm(forms.ModelForm):
