@@ -1,0 +1,20 @@
+<!-- organization_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Organization List</title>
+</head>
+
+<body>
+    <h1>Organization List</h1>
+    <ul>
+        {% for organization in organizations %}
+        <li>{{ organization.name }} - {{ organization.owner.username }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_organization' %}">Create New Organization</a>
+</body>
+
+</html>
