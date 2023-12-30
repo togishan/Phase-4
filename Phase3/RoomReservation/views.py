@@ -3,10 +3,15 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from .models import Organization, Room, Event
+from .models import Organization, Room, Event, UserPermissionForOrganization
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, get_object_or_404
-from .forms import OrganizationForm, RoomForm, EventForm
+from .forms import (
+    OrganizationForm,
+    RoomForm,
+    EventForm,
+    UserPermissionForOrganizationForm,
+)
 
 
 # Create your views here.
@@ -139,3 +144,51 @@ def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     event.delete()
     return redirect("event_list")
+
+
+# Assume you already have views for other models
+# ...
+
+
+def user_permission_for_organization_list(request):
+    permissions = UserPermissionForOrganization.objects.all()
+    return render(
+        request,
+        "user_permission_for_organization_list.html",
+        {"permissions": permissions},
+    )
+
+
+def create_user_permission_for_organization(request):
+    if request.method == "POST":
+        form = UserPermissionForOrganizationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("user_permission_for_organization_list")
+    else:
+        form = UserPermissionForOrganizationForm()
+    return render(
+        request, "create_user_permission_for_organization.html", {"form": form}
+    )
+
+
+def update_user_permission_for_organization(request, permission_id):
+    permission = get_object_or_404(UserPermissionForOrganization, id=permission_id)
+    if request.method == "POST":
+        form = UserPermissionForOrganizationForm(request.POST, instance=permission)
+        if form.is_valid():
+            form.save()
+            return redirect("user_permission_for_organization_list")
+    else:
+        form = UserPermissionForOrganizationForm(instance=permission)
+    return render(
+        request,
+        "update_user_permission_for_organization.html",
+        {"form": form, "permission": permission},
+    )
+
+
+def delete_user_permission_for_organization(request, permission_id):
+    permission = get_object_or_404(UserPermissionForOrganization, id=permission_id)
+    permission.delete()
+    return redirect("user_permission_for_organization_list")

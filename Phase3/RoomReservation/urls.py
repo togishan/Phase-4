@@ -9,6 +9,12 @@ from .views import (
 
 from .views import room_list, create_room, update_room, delete_room
 from .views import event_list, create_event, update_event, delete_event
+from .views import (
+    user_permission_for_organization_list,
+    create_user_permission_for_organization,
+    update_user_permission_for_organization,
+    delete_user_permission_for_organization,
+)
 
 
 urlpatterns = [
@@ -36,4 +42,26 @@ urlpatterns = [
     path("events/create/", create_event, name="create_event"),
     path("events/<int:event_id>/update/", update_event, name="update_event"),
     path("events/<int:event_id>/delete/", delete_event, name="delete_event"),
+    # User Permission for Organization URLs
+    path(
+        "user_permissions_for_organizations/",
+        user_permission_for_organization_list,
+        name="user_permission_for_organization_list",
+    ),
+    path(
+        "user_permissions_for_organizations/create/",
+        create_user_permission_for_organization,
+        name="create_user_permission_for_organization",
+    ),
+    path(
+        "user_permissions_for_organizations/<int:permission_id>/update/",
+        update_user_permission_for_organization,
+        name="update_user_permission_for_organization",
+    ),
+    path(
+        "user_permissions_for_organizations/<int:permission_id>/delete/",
+        delete_user_permission_for_organization,
+        name="delete_user_permission_for_organization",
+    ),
+    # Add similar patterns for other models as needed
 ]
