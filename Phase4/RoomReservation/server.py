@@ -2,16 +2,25 @@ import socket
 from multiprocessing import Process
 import sys
 
-from operation.operation import (
+from .operation.operation import (
     Operation,
     InvalidOperationFormatError,
     OperationFactory,
 )
-from operation.operation_response import OperationResponse
-from operation.handle_operation import handle_operation
+from .operation.operation_response import OperationResponse
+from .operation.handle_operation import handle_operation
 
 HOST = "0.0.0.0"  # Standard loopback interface address (localhost)
 PORT = None  # Port to listen on (non-privileged ports are > 1023)
+
+import os
+
+# ⛔️ Make sure to replace `mysite` with your project's name
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Phase3.settings")
+
+import django
+
+django.setup()
 
 
 class ClientDisconnectedError(Exception):
