@@ -1,0 +1,20 @@
+<!-- update_user_permission_for_organization.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Update User Permission for Organization</title>
+</head>
+
+<body>
+    <h1>Update User Permission for Organization</h1>
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Update">
+    </form>
+    <a href="{% url 'user_permission_for_organization_list' %}">Back to User Permissions for Organization List</a>
+</body>
+
+</html>

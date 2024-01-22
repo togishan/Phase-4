@@ -1,0 +1,46 @@
+<!-- room_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Room List</title>
+</head>
+
+<body>
+    <h1>Room List</h1>
+    <table border="1">
+        <thead>
+          <tr>
+            <th>Room Name</th>
+            <th>Owner Name</th>
+            <th>Coordinate-X</th>
+            <th>Coordinate-Y</th>
+            <th>Capacity</th>
+            <th>Organization</th>
+            <th>Opening Time</th>
+            <th>Closing Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for room in rooms %}
+            <tr>
+              <td>{{ room.name }}</td>
+              <td>{{ room.owner.username }}</td>
+              <td>{{ room.x}}</td>
+              <td>{{ room.y }}</td>
+              <td>{{ room.capacity }}</td>
+              <td>{{ room.organization.name }}</td>
+              <td>{{ room.open_time }}</td>
+              <td>{{ room.close_time }}</td>
+              <td><a href="{% url 'delete_room' room.id %}">Delete</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'create_room' %}">Create New Room</a>
+    <br>
+    <a href="{% url 'main_page' %}">Main Page</a>
+</body>
+
+</html>

@@ -1,0 +1,47 @@
+<!-- user_permission_for_organization_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Permissions for Organization List</title>
+</head>
+
+<body>
+    <h1>User Permissions for Organization List</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>User Name</th>
+                <th>Organization Name</th>
+                <th>Permission</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for permission in permissions %}
+            <tr>
+                <td>
+                    {% for user in permission.user.all %}
+                        {{ user.username }}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for org in permission.organization.all %}
+                        {{ org.name }}
+                    {% endfor %}
+                </td>
+                <td>{{ permission.get_permission_display }}</td>
+                <td>
+                    <a href="{% url 'delete_user_permission_for_organization' permission.id %}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="{% url 'create_user_permission_for_organization' %}">Create New User Permission for Organization</a>
+    <br>
+    <a href="{% url 'main_page' %}">Main Page</a>
+</body>
+
+</html>

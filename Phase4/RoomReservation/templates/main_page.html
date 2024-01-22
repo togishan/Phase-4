@@ -1,0 +1,68 @@
+<!-- main_page.html -->
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 1200px; /* Set your desired height */
+            width: 100%;   /* Set your desired width */
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+<body>
+    <h1>Welcome to the Main Page!</h1>
+
+    <h2>CRUD Operations:</h2>
+    <ul>
+        <li><a href="{% url 'organization_list' %}">Organization List</a></li>
+        <li><a href="{% url 'create_organization' %}">Create New Organization</a></li>
+    </ul>
+
+    <h2>Rooms:</h2>
+    <ul>
+        <li><a href="{% url 'room_list' %}">Room List</a></li>
+        <li><a href="{% url 'create_room' %}">Create New Room</a></li>
+    </ul>
+
+    <h2>Events:</h2>
+    <ul>
+        <li><a href="{% url 'event_list' %}">Event List</a></li>
+        <li><a href="{% url 'create_event' %}">Create New Event</a></li>
+    </ul>
+
+    <h2>User Permissions for Organizations:</h2>
+    <ul>
+        <li><a href="{% url 'user_permission_for_organization_list' %}">User Permissions for Organization List</a></li>
+        <li><a href="{% url 'create_user_permission_for_organization' %}">Create New User Permission for
+                Organization</a></li>
+    </ul>
+
+    <h2>User Permissions for Rooms:</h2>
+    <ul>
+        <li><a href="{% url 'user_permission_for_room_list' %}">User Permissions for Room List</a></li>
+        <li><a href="{% url 'create_user_permission_for_room' %}">Create New User Permission for Room</a></li>
+    </ul>
+
+    <h2>User Permissions for Events:</h2>
+    <ul>
+        <li><a href="{% url 'user_permission_for_event_list' %}">User Permissions for Event List</a></li>
+        <li><a href="{% url 'create_user_permission_for_event' %}">Create New User Permission for
+                Event</a></li>
+    </ul>
+    <a href="/accounts/logout?next=/">Logout</a>
+
+    <div id="map"></div>
+
+    <script src="{% static "map.js" %}"></script>
+</body>
+
+</html>

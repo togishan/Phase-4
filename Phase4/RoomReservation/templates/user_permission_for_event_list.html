@@ -1,0 +1,46 @@
+<!-- user_permission_for_event_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Permissions for Event List</title>
+</head>
+
+<body>
+    <h1>User Permissions for Event List</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>User Name</th>
+                <th>Event Name</th>
+                <th>Permission</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for permission in permissions %}
+            <tr>
+                <td>
+                    {% for user in permission.user.all %}
+                        {{ user.username }}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for event in permission.event.all %}
+                        {{ event.title }}
+                    {% endfor %}
+                </td>
+                <td>{{ permission.get_permission_display }}</td>
+                <td>
+                    <a href="{% url 'delete_user_permission_for_event' permission.id %}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'create_user_permission_for_event' %}">Create New User Permission for Event</a>
+        <br>
+    <a href="{% url 'main_page' %}">Main Page</a>
+</body>
+
+</html>

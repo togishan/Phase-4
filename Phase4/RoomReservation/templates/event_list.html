@@ -1,0 +1,49 @@
+<!-- event_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Event List</title>
+</head>
+
+<body>
+    <h1>Event List</h1>
+    <table border="1">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Owner</th>
+            <th>Category</th>
+            <th>Capacity</th>
+            <th>Duration</th>
+            <th>Start Time</th>
+            <th>Location</th>
+            <th>Weekly</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+            <tr>
+              <td>{{ event.title }}</td>
+              <td>{{ event.description }}</td>
+              <td>{{ event.owner.username }}</td>
+              <td>{{ event.category  }}</td>
+              <td>{{ event.capacity }}</td>
+              <td>{{ event.duration }}</td>
+              <td>{{ event.start_time }}</td>
+              <td>{{ event.location.name }}</td>
+              <td>{{ event.weekly }}</td>
+              <td><a href="{% url 'delete_event' event.id %}">Delete</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    <a href="{% url 'create_event' %}">Create New Event</a>
+    <br>
+    <a href="{% url 'main_page' %}">Main Page</a>
+</body>
+
+</html>

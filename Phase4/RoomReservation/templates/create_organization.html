@@ -1,0 +1,22 @@
+<!-- create_organization.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Create Organization</title>
+</head>
+
+<body>
+    <h1>Create Organization</h1>
+    <form method="post" action="">
+        {% csrf_token %}
+        Oranization Name: <input type="text" name="organization_name" value="">
+        <input type="hidden" name="action" value="create_organization">
+        <button type="submit">Create</button>
+    </form>
+  
+    <a href="{% url 'organization_list' %}">Back to Organization List</a>
+</body>
+
+</html>

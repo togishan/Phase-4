@@ -1,0 +1,20 @@
+<!-- update_user_permission_for_event.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Update User Permission for Event</title>
+</head>
+
+<body>
+    <h1>Update User Permission for Event</h1>
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Update">
+    </form>
+    <a href="{% url 'user_permission_for_event_list' %}">Back to User Permissions for Event List</a>
+</body>
+
+</html>
