@@ -41,7 +41,7 @@ class RegistrationView(CreateView):
         data = {'type': 'register', 'args': {'username': username, 'password': password}}
         json_data = json.dumps(data)
         headers = {'Content-Type': 'application/json'}
-        phase2_command_response = requests.post('http://localhost:1424', json=json_data, headers=headers)
+        phase2_command_response = requests.post('http://localhost:1424', data=json_data, headers=headers)
         result_message = phase2_command_response.text
         print(result_message)
         return response  

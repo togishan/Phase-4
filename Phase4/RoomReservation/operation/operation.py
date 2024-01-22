@@ -73,9 +73,7 @@ class OperationFactory:
             json_data = operation_data[empty_line_index + 4:].decode("utf-8")
             print(json_data)
             data = json.loads(json_data)
-            print(data[0])
-            print(type(data))
-
+            print(data["type"])
             return OperationFactory.from_dict(data)
 
         # Handle the case where the empty line is not found
